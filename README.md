@@ -5,4 +5,4 @@ The goal is to build **end-to-end, recruiter-friendly projects**: clean data pip
 ---
 ## Projects
 
-### 1) Forage — JPMorgan Quantitative Research (Virtual Experience)
+### 1) Forage — JPMorgan Virtual Experience
