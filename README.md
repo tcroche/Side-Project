@@ -6,3 +6,5 @@ The goal is to build **end-to-end, recruiter-friendly projects**: clean data pip
 ## Projects
 
 ### 1) Forage — JPMorgan Virtual Experience
+**Goal:** practice practical quant research tasks (data analysis, statistics, and algorithm development).
+📁 Folder: `Forage_JP_virtual/`
