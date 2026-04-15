@@ -1,5 +1,5 @@
 # Side-Project
-This repository gathers my personal side projects in **quantitative finance** and **financial data analysis**.
+This repository gathers my personal side projects in all sorts of domain.
 The goal is to build **end-to-end, recruiter-friendly projects**: clean data pipelines, robust research, and reproducible results.
 
 ---
