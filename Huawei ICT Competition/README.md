@@ -120,5 +120,4 @@ Edit this file to make the tool your own. Richer, more specific `keywords` and `
 ---
 
 ## License
-
-Add a license of your choice (e.g. MIT) if you intend to make this public.
+Feel free to use.
