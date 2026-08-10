@@ -1,0 +1,24 @@
+# Backtest Integrity Auditor -- pinned to lower bounds, Python 3.12
+#
+# Core statistics (Modules 1 & 2) -- required
+numpy>=1.26
+pandas>=2.2
+scipy>=1.13
+
+# Code auditor: the AST engine uses the standard library `ast` module only.
+# No dependency needed.
+
+# Semantic LLM pass (Module 2b) -- required only for the LLM findings
+anthropic>=0.34
+python-dotenv>=1.0
+PyYAML>=6.0
+
+# Report generator (Module 4)
+matplotlib>=3.8
+fpdf2>=2.7
+
+# UI
+streamlit>=1.35
+
+# Development
+pytest>=8.0
