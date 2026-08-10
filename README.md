@@ -27,3 +27,8 @@ The goal is to build **end-to-end, recruiter-friendly projects**: clean data pip
 
 ### 5) Earnings analyzer
 **Goal:** NLP... Coming...
+
+### 6) Polymer Tech Expo
+**Goal:** LLM and finance... whose idea was it to pursue quant finance ? Wait... Mine...
+
+📁 Folder: `Polymer_project/`
