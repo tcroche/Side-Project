@@ -229,26 +229,50 @@ Which is exactly why the tool needs both halves.*
 **Time.** ~5 h. Suite at 109 tests.
  
 ---
+## 2026-08-11 - Day 1: LLM semantic pass
+ 
+**Goal.** The semantic layer: everything the AST rules cannot express, with the
+grounding guarantee enforced by code rather than asserted by the model.
+ 
+**Built.**
+- `prompts/code_auditor_v1.yaml` : versioned prompt registry entry (version,
+  date, model, temperature 0, changelog, worked examples), in the format the
+  Polymer brief asks to see. The system prompt EXCLUDES the AST rules'
+  territory by name (shift, center=True, bfill, fit-on-test, whole-sample
+  z-scores, position*return), so the model only hunts what the rules cannot:
+  `merge_asof` direction errors, forward-looking label construction, custom
+  functions that read ahead without banned keywords.
+- `auditor/llm_pass.py` : client abstraction (real Anthropic client built only
+  when a key exists; a stub in tests), strict JSON parsing (markdown fences
+  tolerated, prose rejected wholesale rather than repaired), and
+  `ground_findings`, where the guarantees live.
+- `tests/test_llm_pass.py` : 21 tests, none touching the network.
+**The trust model, concretely.** Line numbers are checked against the real
+file; invented lines are rejected and counted. The snippet shown next to each
+finding is extracted from the actual source by my code, the model's claimed
+snippet is never displayed. Unknown severities coerce to "review". A client
+exception degrades to AST-only instead of crashing. Rejections are kept in the
+JSON output so the rejection RATE is measurable, that number goes in the
+benchmark table.
+ 
+**Definition of done, made executable.** The B3 criterion was "0 findings with
+a nonexistent line number over 20 runs". That is now literally a test:
+`test_definition_of_done_no_invented_line_survives_twenty_runs` feeds 20
+scripted responses, each containing an invented line, and asserts none survives
+grounding. It runs in CI forever, not once on a good day.
+ 
+**Offline mode.** `AUDITOR_OFFLINE=1` or a missing key skips the pass with an
+explanatory note and leaves the deterministic findings untouched. The demo has
+a network-failure story built in.
+ 
+**Design decision — separate sections, stated epistemology.** LLM findings
+print under "SEMANTIC FINDINGS (LLM) - TO VERIFY" with the sentence "each one
+is a question, not a verdict". Deterministic and probabilistic findings are
+never mixed, which is also the honest answer to "how do you deal with
+hallucinated findings?".
+ 
+**Time.** ~2.5 h. Suite at 130 tests.
 
-2026-08-11 - Day 1: LLM semantic pass
-
-Goal. The semantic layer: everything the AST rules cannot express, with the grounding guarantee enforced by code rather than asserted by the model.
-
-Built.
-
-prompts/code_auditor_v1.yaml : versioned prompt registry entry (version, date, model, temperature 0, changelog, worked examples), in the format the Polymer brief asks to see. The system prompt EXCLUDES the AST rules' territory by name (shift, center=True, bfill, fit-on-test, whole-sample z-scores, position*return), so the model only hunts what the rules cannot: merge_asof direction errors, forward-looking label construction, custom functions that read ahead without banned keywords.
-auditor/llm_pass.py : client abstraction (real Anthropic client built only when a key exists; a stub in tests), strict JSON parsing (markdown fences tolerated, prose rejected wholesale rather than repaired), and ground_findings, where the guarantees live.
-tests/test_llm_pass.py : 21 tests, none touching the network.
-
-The trust model, concretely. Line numbers are checked against the real file; invented lines are rejected and counted. The snippet shown next to each finding is extracted from the actual source by my code - the model's claimed snippet is never displayed. Unknown severities coerce to "review". A client exception degrades to AST-only instead of crashing. Rejections are kept in the JSON output so the rejection RATE is measurable — that number goes in the benchmark table.
-
-Definition of done, made executable. The B3 criterion was "0 findings with a nonexistent line number over 20 runs". That is now literally a test: test_definition_of_done_no_invented_line_survives_twenty_runs feeds 20 scripted responses, each containing an invented line, and asserts none survives grounding. It runs in CI forever, not once on a good day.
-
-Offline mode. AUDITOR_OFFLINE=1 or a missing key skips the pass with an explanatory note and leaves the deterministic findings untouched. The demo has a network-failure story built in.
-
-Design decision — separate sections, stated epistemology. LLM findings print under "SEMANTIC FINDINGS (LLM) - TO VERIFY" with the sentence "each one is a question, not a verdict". Deterministic and probabilistic findings are never mixed, which is also the honest answer to "how do you deal with hallucinated findings?".
-
-Time. ~2.5 h. Suite at 130 tests.
 
 ## It's top secret at least for the moment
 ---
