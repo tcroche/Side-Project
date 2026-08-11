@@ -273,6 +273,78 @@ hallucinated findings?".
  
 **Time.** ~2.5 h. Suite at 130 tests.
 
+## 2026-08-11 : first contact with real code, on both sides
+ 
+**The semantic pass met the real M2 repository.** 17 files, 3 findings
+accepted, **0 rejected by grounding** — the line-verification machinery has now
+held on real model output, not just on scripted stubs. Analysis of the three:
+ 
+1. `compare_trend.py` [review] — "does `load_ticker_series()` apply
+   whole-sample transformations before the IS filter?" Resolved by reading
+   `data_loader.py`: the only fill is `ffill()`, which is causal. Verdict:
+   clean, and the model was right to ask rather than assert.
+2. `dsr.py` [review] — "does `eval_cell()` enforce an IS-only window?"
+   Resolved by reading `calibrate_is.py`: `run_backtest(..., end=IS_END)` is
+   hardcoded inside `eval_cell`. Clean. Same pattern: a per-file analyzer
+   flagged a cross-file dependency as a question.
+3. `strategy_trend.py` [HIGH] — same-bar execution claim. This one is a
+   **severity miscalibration**. The model's own text says the leak exists
+   "when the caller multiplies pos[t] by the return of bar t" — i.e. it is
+   conditional on a caller it could not see. The actual caller,
+   `backtester.py`, computes `pos[:-1] * np.diff(P)`: the position decided at
+   t earns P[t+1]−P[t]. Causal. By the prompt's own rule 3 this should have
+   been "review". The tool's design already contained the mitigation — the
+   finding sat in the "TO VERIFY" section, never merged with deterministic
+   results — but the prompt needed to encode the lesson.
+**Prompt bumped to 1.1.0**, driven by that miss: new rule 6 (a finding whose
+leak depends on code outside the file is capped at "review" and must name the
+exact external fact to check) and a worked example of a loop engine with an
+explicit held-over-[t,t+1] convention that must yield no findings. The
+registry did what a registry is for: the old prompt text stays in git and in
+the changelog, and tomorrow's benchmark will measure 1.1.0, not a moving
+target. Lesson recorded: **per-file analysis is the semantic pass's structural
+limitation**; multi-file context goes in "future enhancements", honestly.
+ 
+**Then the tables turned: I audited the auditor.** `run_audit.py .` over this
+repository produced **6 findings, all false positives**, in exactly two
+classes:
+ 
+- *Target-vocabulary homonyms used non-numerically.* `targets` (AST assignment
+  targets in `ast_scan.py` itself), `labels` and `label` (axis labels in
+  `concentration.py` and `run_real_case.py`) fired R5, though none of them
+  moves target VALUES into a feature — they are iterated, joined, or passed to
+  `getattr`.
+- *R10 mistaking a Sharpe ratio for a normalisation.* `matrix.mean(axis=0) /
+  matrix.std(axis=0)` is a cross-sectional Sharpe — a legitimate whole-sample
+  computation — but any mean/std division matched the old heuristic.
+**Fixes, both principled rather than special-cased.** R5 now classifies HOW a
+target reference is used, via a parent-map walk-up: arithmetic, comparisons,
+method chains, subscripts and plain aliasing count as value uses; comprehension
+iterables, `str`/`len`/`getattr`-style introspection and metadata attributes
+(`.index`, `.shape`) do not. R10 now requires the z-score SHAPE, a
+subtraction in the numerator — so re-centring fires and ratios of statistics
+do not. One regression during the rework (`y_test.index` briefly counted as a
+value use through the Attribute branch) was caught by the existing alignment
+tests before it ever shipped; the fix routes metadata attributes to non-value.
+ 
+**The six false positives are now a permanent regression corpus**
+(`TestSelfAuditFalsePositives`, each snippet lifted verbatim from the file
+that fired), and `tests/test_self_audit.py` audits every source file of the
+repository inside CI, the tool must stay clean under its own rules forever,
+parameterized per file so a regression names the exact file. Trapped-script
+check after the tightening: still 9/9 true positives.
+ 
+**Quality note for the benchmark.** Today produced real measured numbers to
+report alongside tomorrow's synthetic ones: grounding rejection rate 0/3 on
+real code, AST false-positive rate 6→0 on a 30-file adversarial clean corpus
+(this repo), true-positive retention 9/9 on the trapped script.
+ 
+**Time.** ~2 h. Suite at 162 tests.
+ 
+---
+ 
+## 2026-08-12 — Day 4: seeded-bug benchmark
+
 
 ## It's top secret at least for the moment
 ---
