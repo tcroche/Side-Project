@@ -342,8 +342,67 @@ real code, AST false-positive rate 6→0 on a 30-file adversarial clean corpus
 **Time.** ~2 h. Suite at 162 tests.
  
 ---
+## 2026-08-12 — Day 2: the cap moves from the prompt into the code
  
-## 2026-08-12 — Day 4: seeded-bug benchmark
+**Re-ran the semantic pass on `strategy_trend.py` under prompt v1.1.0, the
+version written specifically to fix yesterday's miscalibrated finding, and it
+violated its own rule 6 three ways at once.** The finding came back "medium"
+instead of "review"; it named no external fact to check; and it was phrased as
+a verdict ("This *is* a look-ahead bias") one sentence after hedging its own
+premise ("pos[t] is then *implicitly* used..."). Worse, the suggested fix was
+wrong for the actual code: `backtester.py` computes `pos[:-1] * np.diff(P)`,
+so `pos[t]` already earns `P[t+1] − P[t]`; shifting the position by one bar,
+as the model prescribed, would delay a causal signal and degrade a correct
+engine. There is no leak here — the information set at the decision is
+{P₀…P_t} and the realized return is P_{t+1} − P_t. What the model touched is
+a legitimate *execution-assumption* question (can one really fill at P_t
+after observing P_t?), which is cross-file by nature and worth exactly
+"review".
+ 
+**The lesson, stated once and built on: a prompt rule is a request; code is a
+guarantee.** Design principle 5 already said grounding is verified by the
+code, never asserted by the model, but severity *entitlement* was still
+being asserted, not verified. Fixed structurally:
+ 
+- The JSON schema (prompt **v1.2.0**) gains a required `external_dependency`
+  field. `null` means "the leak is established within this file alone".
+- `ground_findings()` now enforces the entitlement deterministically:
+  **high/medium must be earned** by an explicit `external_dependency: null`.
+  A declared dependency — *or a missing field*, caps the severity at
+  "review", records the original claim in `capped_from`, and increments a
+  `capped` counter exposed in the JSON next to the rejection counter, so the
+  disagreement rate between model and harness is measurable. Omission is
+  never a path to a higher severity.
+- Vocabulary coercion and the cap stay distinct: an out-of-vocabulary
+  severity is a vocabulary problem, not an entitlement problem, and does not
+  inflate the counter. A model that already said "review" agreed with the
+  policy and is not counted either.
+- Prompt v1.2.0 also adds rule 7 (fixes for dependent findings must be
+  conditional on the named external fact, the blind fix above is the worked
+  counter-example) and a fourth example distilled from the real miss: a
+  signal-only loop with no visible engine, whose expected answer is a
+  "review" naming the consumer's P&L convention.
+**Caching, built tonight because the benchmark needs it tomorrow.**
+`auditor/cache.py` wraps any client and memoizes `complete()` on disk, keyed
+on the sha256 of the *exact* (system, user) pair. By construction a prompt
+bump or a one-character source change can never be served a stale response;
+identical re-runs never re-bill. Corrupt entries degrade to a miss and heal.
+Hit/miss counters are printed after `run_audit.py --llm`, same philosophy as
+the rejection rate: measured, not assumed. This is also the ablation
+infrastructure: one set of API calls, two post-processings
+(`enforce_external_cap=True/False`), so tomorrow's benchmark can report
+"N severities corrected, 0 detections lost" from identical model outputs,
+the cap changes calibration, never localization.
+ 
+**Verification.** Replayed this morning's real payload (medium, no field,
+verdict) through the new pipeline: capped to review with `capped_from:
+medium`; ablation mode reproduces the v1.1.0 behaviour exactly. The two new
+source files enter the self-audit corpus automatically (23 files now). Suite:
+**187 tests**, all green (was 162; +15 llm_pass, +8 cache, +2 self-audit).
+ 
+**Time.** ~1 h.
+ 
+## 2026-08-13 - Day 2: seeded-bug benchmark
 
 
 ## It's top secret at least for the moment
