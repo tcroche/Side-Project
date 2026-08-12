@@ -402,7 +402,70 @@ source files enter the self-audit corpus automatically (23 files now). Suite:
  
 **Time.** ~1 h.
  
-## 2026-08-13 - Day 2: seeded-bug benchmark
+## 2026-08-12 - Day 2 build: the seeded-bug benchmark
+ 
+**16 cases in `bench/cases/`, one category more than the spec.** 8 trapped (9
+seeded catalogue leaks — R1, R2, R3, R5, R8, R9, R10, plus one double), 5
+clean controls, 2 semantic leaks no syntactic rule can express, and 1
+**dependent** case — a category that did not exist when the benchmark was
+specified, created by the strategy_trend episode: a signal-only file whose
+causality hinges on an unseen caller, where the correct answer is a *question*
+at "review" naming the external convention. Not a verdict, and not silence.
+The two semantic seeds are chosen to sit exactly in the AST's blind spots:
+`groupby(day).transform("mean")` (a whole-bucket aggregate that R10's window
+whitelist treats as trailing) and a loop that reads `prices[t + horizon]`
+with no banned keyword anywhere.
+ 
+**Building the benchmark caught two real defects before measuring anything.**
+ 
+1. *R1 had a precision gap.* Seeding trap07 (`target =
+   close.pct_change().shift(-1)` then `edge = target.rolling(5).mean()`)
+   made R1 flag the label construction, the one negative shift its own fix
+   text calls legitimate ("only legitimate when building the TARGET"). The
+   documentation prescribed an exemption the code never implemented. Fixed:
+   a negative shift inside a *bare* target-named assignment no longer fires;
+   re-use of that label as a feature remains R5's territory (and R5 does
+   fire on trap07's line 12). The exemption is deliberately narrow,
+   `df['target'] = ...` still fires, because when unsure a leak detector
+   keeps firing. Five new rule tests pin all of this down.
+2. *Case-design artifacts are a failure mode of benchmarks themselves.* My
+   first trap05 used `y_`-prefixed parameter names inside the model class,
+   and R5's naming heuristic fired twice on lines that are not leaks. A
+   trapped case must contain exactly its seeded leaks and nothing else, or
+   "precision" starts measuring the benchmark author instead of the tool.
+   Renamed, re-audited, locked.
+**The ground truth cannot drift.** `bench/truth.py` records, per case, the
+seeded leaks with family, expected rule and lines, and `tests/test_bench.py`
+asserts strict equality between that registry and what the real scanner
+produces on every trapped case, plus AST-silence on all 8 non-trapped cases.
+"Invisible to syntax" is now a test, not a claim.
+ 
+**Scoring conventions, stated once (`bench/score.py`).** Detections are
+findings at severity ≥ medium, mirroring the tool's own reporting convention:
+review-level items are questions, counted apart, never hits and never false
+alarms. Matching is by line overlap, so localisation and calibration stay
+separate, the severity cap can never masquerade as lost recall. Multiple
+detections on one leak are all true positives; precision runs over every
+detection on every file, clean ones included; control-file false positives
+(clean + dependent) get their own counter; the LLM's hits on catalogue leaks
+are true positives but tallied as out-of-lane, since the prompt forbids
+re-reporting the rules' territory.
+ 
+**The runner (`run_bench.py`).** Default mode is AST-only: free, offline,
+deterministic — the dry run rule 9 demands before anything costly. `--llm`
+adds the semantic pass (responses cached) and immediately replays the same
+cached outputs with the cap disabled: one set of API calls, two
+post-processings, so the ablation reports severity changes and control-file
+detections with localisation held identical by construction. A final block
+audits the tool's own source and `m2_backtester/` *live*, printed numbers
+are measured at run time, never quoted (rule 2).
+ 
+**Measured tonight (deterministic half, no API):** AST only — 9 detections,
+9 TP, 0 FP, precision 1.00, recall 9/9 on catalogue leaks, 0/2 on semantic
+ones (the gap is the point), overall recall 0.82, F1 0.90, **0 false
+positives on the 6 control files**, 0 review-level questions. Live self-audit
+inside the same run: 28 files, 0 findings. Suite: **222 tests** (was 187;
++26 bench, +5 rules, +5 self-audit corpus).
 
 
 ## It's top secret at least for the moment
