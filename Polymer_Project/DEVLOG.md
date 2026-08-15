@@ -82,7 +82,7 @@ one so the real case can be deflated tomorrow morning without surprises.
 1. *The grid is 18 cells, not 30.* `itertools.product(WINDOWS, K_ENTRYS, STOPS)`
    = 3 x 3 x 2 = 18, plus a 3-point gamma sweep = 21. My write-up said "~30
    configurations". `dsr.py` already reports DSR at N in {18, 21, 30}, which is
-   the right instinct — N is genuinely uncertain because exploration happened in
+   the right instinct, N is genuinely uncertain because exploration happened in
    `diagnostics.py`, `compare_trend.py` and `compare_strategies.py` as well. The
    honest statement is "18 recorded in the calibration grid, roughly 30 across
    the whole project", and the tool reports DSR as a function of N rather than a
@@ -162,7 +162,7 @@ also why the mean pairwise correlation between trials is 0.915.
  
 This is not something the DSR tells you. It needed a new module,
 `core/concentration.py`, and it is now the most legible output the tool
-produces — no statistics background required to understand "70% of the profit
+produces, no statistics background required to understand "70% of the profit
 came from one day".
  
 **Finding 2 : the non-normality correction is HELPING the strategy.** Skewness
@@ -265,7 +265,7 @@ grounding. It runs in CI forever, not once on a good day.
 explanatory note and leaves the deterministic findings untouched. The demo has
 a network-failure story built in.
  
-**Design decision — separate sections, stated epistemology.** LLM findings
+**Design decision : separate sections, stated epistemology.** LLM findings
 print under "SEMANTIC FINDINGS (LLM) - TO VERIFY" with the sentence "each one
 is a question, not a verdict". Deterministic and probabilistic findings are
 never mixed, which is also the honest answer to "how do you deal with
@@ -276,26 +276,26 @@ hallucinated findings?".
 ## 2026-08-11 : first contact with real code, on both sides
  
 **The semantic pass met the real M2 repository.** 17 files, 3 findings
-accepted, **0 rejected by grounding** — the line-verification machinery has now
+accepted, **0 rejected by grounding**, the line-verification machinery has now
 held on real model output, not just on scripted stubs. Analysis of the three:
  
-1. `compare_trend.py` [review] — "does `load_ticker_series()` apply
+1. `compare_trend.py` [review] : "does `load_ticker_series()` apply
    whole-sample transformations before the IS filter?" Resolved by reading
    `data_loader.py`: the only fill is `ffill()`, which is causal. Verdict:
    clean, and the model was right to ask rather than assert.
-2. `dsr.py` [review] — "does `eval_cell()` enforce an IS-only window?"
+2. `dsr.py` [review] : "does `eval_cell()` enforce an IS-only window?"
    Resolved by reading `calibrate_is.py`: `run_backtest(..., end=IS_END)` is
    hardcoded inside `eval_cell`. Clean. Same pattern: a per-file analyzer
    flagged a cross-file dependency as a question.
-3. `strategy_trend.py` [HIGH] — same-bar execution claim. This one is a
+3. `strategy_trend.py` [HIGH] : same-bar execution claim. This one is a
    **severity miscalibration**. The model's own text says the leak exists
-   "when the caller multiplies pos[t] by the return of bar t" — i.e. it is
+   "when the caller multiplies pos[t] by the return of bar t", i.e. it is
    conditional on a caller it could not see. The actual caller,
    `backtester.py`, computes `pos[:-1] * np.diff(P)`: the position decided at
    t earns P[t+1]−P[t]. Causal. By the prompt's own rule 3 this should have
-   been "review". The tool's design already contained the mitigation — the
+   been "review". The tool's design already contained the mitigation, the
    finding sat in the "TO VERIFY" section, never merged with deterministic
-   results — but the prompt needed to encode the lesson.
+   results, but the prompt needed to encode the lesson.
 **Prompt bumped to 1.1.0**, driven by that miss: new rule 6 (a finding whose
 leak depends on code outside the file is capped at "review" and must name the
 exact external fact to check) and a worked example of a loop engine with an
@@ -312,17 +312,17 @@ classes:
 - *Target-vocabulary homonyms used non-numerically.* `targets` (AST assignment
   targets in `ast_scan.py` itself), `labels` and `label` (axis labels in
   `concentration.py` and `run_real_case.py`) fired R5, though none of them
-  moves target VALUES into a feature — they are iterated, joined, or passed to
+  moves target VALUES into a feature, they are iterated, joined, or passed to
   `getattr`.
 - *R10 mistaking a Sharpe ratio for a normalisation.* `matrix.mean(axis=0) /
-  matrix.std(axis=0)` is a cross-sectional Sharpe — a legitimate whole-sample
-  computation — but any mean/std division matched the old heuristic.
+  matrix.std(axis=0)` is a cross-sectional Sharpe, a legitimate whole-sample
+  computation, but any mean/std division matched the old heuristic.
 **Fixes, both principled rather than special-cased.** R5 now classifies HOW a
 target reference is used, via a parent-map walk-up: arithmetic, comparisons,
 method chains, subscripts and plain aliasing count as value uses; comprehension
 iterables, `str`/`len`/`getattr`-style introspection and metadata attributes
 (`.index`, `.shape`) do not. R10 now requires the z-score SHAPE, a
-subtraction in the numerator — so re-centring fires and ratios of statistics
+subtraction in the numerator, so re-centring fires and ratios of statistics
 do not. One regression during the rework (`y_test.index` briefly counted as a
 value use through the Attribute branch) was caught by the existing alignment
 tests before it ever shipped; the fix routes metadata attributes to non-value.
@@ -342,7 +342,7 @@ real code, AST false-positive rate 6→0 on a 30-file adversarial clean corpus
 **Time.** ~2 h. Suite at 162 tests.
  
 ---
-## 2026-08-12 — Day 2: the cap moves from the prompt into the code
+## 2026-08-12 - Day 2: the cap moves from the prompt into the code
  
 **Re-ran the semantic pass on `strategy_trend.py` under prompt v1.1.0, the
 version written specifically to fix yesterday's miscalibrated finding, and it
@@ -353,7 +353,7 @@ premise ("pos[t] is then *implicitly* used..."). Worse, the suggested fix was
 wrong for the actual code: `backtester.py` computes `pos[:-1] * np.diff(P)`,
 so `pos[t]` already earns `P[t+1] − P[t]`; shifting the position by one bar,
 as the model prescribed, would delay a causal signal and degrade a correct
-engine. There is no leak here — the information set at the decision is
+engine. There is no leak here, the information set at the decision is
 {P₀…P_t} and the realized return is P_{t+1} − P_t. What the model touched is
 a legitimate *execution-assumption* question (can one really fill at P_t
 after observing P_t?), which is cross-file by nature and worth exactly
@@ -368,7 +368,7 @@ being asserted, not verified. Fixed structurally:
   field. `null` means "the leak is established within this file alone".
 - `ground_findings()` now enforces the entitlement deterministically:
   **high/medium must be earned** by an explicit `external_dependency: null`.
-  A declared dependency — *or a missing field*, caps the severity at
+  A declared dependency, *or a missing field*, caps the severity at
   "review", records the original claim in `capped_from`, and increments a
   `capped` counter exposed in the JSON next to the rejection counter, so the
   disagreement rate between model and harness is measurable. Omission is
@@ -405,9 +405,9 @@ source files enter the self-audit corpus automatically (23 files now). Suite:
 ## 2026-08-12 - Day 2 build: the seeded-bug benchmark
  
 **16 cases in `bench/cases/`, one category more than the spec.** 8 trapped (9
-seeded catalogue leaks — R1, R2, R3, R5, R8, R9, R10, plus one double), 5
+seeded catalogue leaks, R1, R2, R3, R5, R8, R9, R10, plus one double), 5
 clean controls, 2 semantic leaks no syntactic rule can express, and 1
-**dependent** case — a category that did not exist when the benchmark was
+**dependent** case, a category that did not exist when the benchmark was
 specified, created by the strategy_trend episode: a signal-only file whose
 causality hinges on an unseen caller, where the correct answer is a *question*
 at "review" naming the external convention. Not a verdict, and not silence.
@@ -452,7 +452,7 @@ are true positives but tallied as out-of-lane, since the prompt forbids
 re-reporting the rules' territory.
  
 **The runner (`run_bench.py`).** Default mode is AST-only: free, offline,
-deterministic — the dry run rule 9 demands before anything costly. `--llm`
+deterministic, the dry run rule 9 demands before anything costly. `--llm`
 adds the semantic pass (responses cached) and immediately replays the same
 cached outputs with the cap disabled: one set of API calls, two
 post-processings, so the ablation reports severity changes and control-file
@@ -460,12 +460,96 @@ detections with localisation held identical by construction. A final block
 audits the tool's own source and `m2_backtester/` *live*, printed numbers
 are measured at run time, never quoted (rule 2).
  
-**Measured tonight (deterministic half, no API):** AST only — 9 detections,
+**Measured tonight (deterministic half, no API):** AST only, 9 detections,
 9 TP, 0 FP, precision 1.00, recall 9/9 on catalogue leaks, 0/2 on semantic
 ones (the gap is the point), overall recall 0.82, F1 0.90, **0 false
 positives on the 6 control files**, 0 review-level questions. Live self-audit
 inside the same run: 28 files, 0 findings. Suite: **222 tests** (was 187;
 +26 bench, +5 rules, +5 self-audit corpus).
+
+### Live LLM numbers - measured 2026-08-12 (night), `python run_bench.py --llm --json bench_results.json`
+ 
+**The table.** Detection threshold: severity ≥ medium; review-level findings
+are questions, counted apart.
+ 
+| Detector | det | TP | FP | P | R catalogue (/9) | R semantic (/2) | leaks found (/11) | control-file FP (/6) |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| AST only | 9 | 9 | 0 | 1.00 | 9/9 | 0/2 | 9/11 | 0 |
+| LLM only (v1.2.0, cap on) | 9 | 9 | 0 | 1.00 | 7/9 | 2/2 | 9/11 | 0 |
+| Hybrid (union) | 18 | 18 | 0 | 1.00 | 9/9 | 2/2 | **11/11** | 0 |
+| LLM only (cap off, same cache) | 9 | 9 | 0 | 1.00 | 7/9 | 2/2 | 9/11 | 0 |
+ 
+Plumbing: prompt 1.2.0, temperature 0; grounding rejections **0/10** findings
+(no invented line in 16 files); harness caps **0**; review-level questions
+**1** (dep01); cache 16 misses then 16 hits, the ablation cost nothing.
+Live real-code block in the same run: this repository 28 files / 0
+findings; `m2_backtester/` 16 files / 0 findings.
+ 
+**How to read "Hybrid 18/18, F1 1.00" without overclaiming.** 18 TP is
+*agreement*, not 18 discoveries: 7 leaks were found by both halves and are
+counted twice by the stated convention. The headline is the last-but-one
+column, **11/11 seeded leaks found, 0 false positives on 6 controls** , and
+above all the *complementarity*: the deterministic rules found 9/9 syntactic
+leaks and 0/2 semantic ones; the model found 2/2 semantic ones. Each half
+catches exactly what the other cannot, on this benchmark. And this benchmark
+is small (16 files, 11 leaks) and in-distribution by construction, we wrote
+the detectors, the prompt and the cases; the clean causal engine (clean01)
+resembles a worked example in the prompt. The numbers measure the design's
+coherence, not its field performance. A field number needs external code
+with independently established leaks; out of scope before the 16th, and
+said so.
+ 
+**Three loop-based files, same syntactic shape, three different correct
+answers, all three delivered.** `clean01` (engine visible, causal) →
+silence. `sem02` (engine visible, reads `prices[t+5]`) → high, self-contained.
+`dep01` (no engine visible) → **review, external convention named, fix
+conditional in both branches**, the model self-capped exactly as v1.2.0
+asks, so the harness cap had nothing to do. This is the discrimination the
+whole semantic design was built for, and it is the strongest single result of
+the run.
+ 
+**The cap did not fire, and that is the honest reading of the ablation.**
+Cap-on and cap-off runs are identical (10 locations, 0 severity changes, 0
+control detections either way): under v1.2.0 the model never claimed an
+unearned severity on these 16 files. So the ablation is *degenerate* here, it
+demonstrates compliance, not correction. Where the cap's necessity is
+evidenced is the v1.1.0 episode (n=1, real code, three violations at once),
+and its sufficiency is proven by the unit test that replays that real payload
+(medium → review, `capped_from: medium`). Two observations of v1.2.0
+compliance on dependent-type files (strategy_trend.py, dep01) cannot separate
+"better prompt" from "announced enforcement"; the guarantee no longer depends
+on either.
+ 
+**The negative exclusion list is weakly obeyed, the most useful lesson for
+"iterations".** The prompt says the model MUST NOT re-report the catalogue
+patterns. Of 8 instances of explicitly excluded patterns in the trapped files,
+the model stayed silent on 2 (`rolling(center=True)`, `raw.bfill()`) and
+reported 6 (`shift(-1)`, `shift(-2)`, `fillna(method="bfill")`, both fits,
+the whole-sample z-score): **exclusion compliance 2/8**. It obeyed on the two
+most keyword-obvious forms and disobeyed on the same pattern in another
+syntactic form (`bfill()` silent, `fillna(method="bfill")` reported). Two
+consequences. First, the same asymmetry as the severity story: an instruction
+is a request; lane discipline, if it matters, must be enforced in code (a
+SEM finding overlapping an AST finding can be tagged "corroborates R-x" at
+reporting time, never merged, per principle 4, and the corroboration
+counted). Second, the LLM's 7/9 catalogue recall is not a performance number
+we can interpret: on the 2 unreported cases we cannot distinguish obedience
+from a miss without a lane-off prompt run. This is exactly why the AST layer
+is the floor for catalogue patterns: deterministic, offline, guaranteed
+recall on its territory. (Precision note: R5, feature built from the label,
+is catalogue territory but is *not* on the prompt's exclusion list, so the
+trap07 hit is legitimate; the runner's "7 out-of-lane" counts it, the "2/8"
+above does not.)
+ 
+**Reproducibility caveat, stated once.** The LLM rows are reproducible from
+the cache (same raw outputs, deterministic post-processing), not necessarily
+from fresh API calls: temperature 0 does not make a hosted model
+bit-reproducible. `run_bench.py --llm --no-cache` is the experiment that
+would measure run-to-run variance; not run before the deadline.
+ 
+**Time.** Build ~2 h; live run 16 API calls, a few minutes.
+ 
+---
 
 
 ## It's top secret at least for the moment
