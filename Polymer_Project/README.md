@@ -13,8 +13,8 @@ BIA answers both questions, keeps the two answers apart, and states in writing w
 cannot see. One command produces one self-contained HTML report that opens offline and
 prints to A4 PDF from any browser.
 
-> Built for the Polymer Capital Tech Expo 2026 by Théo Crochemar, M.Sc. Applied Mathematics
-> and Quantitative Finance, Université Paris 1 Panthéon-Sorbonne.
+> Built for the Polymer Capital Tech Expo 2026 by Théo Crochemar, MSc. Applied Mathematics
+> and Quantitative Finance (MMMEF), Université Paris 1 Panthéon-Sorbonne.
 
 ---
 
