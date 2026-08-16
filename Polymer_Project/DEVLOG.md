@@ -832,5 +832,65 @@ placeholder left.
 **Time.** ~1 h.
 
 ---
+## 2026-08-16 (evening) - Day 4D: the repository is checked by a script, not by a checklist
+
+**Two defects found by trying to publish, both invisible until then.**
+
+1. `docs/build_writeup.py` hard-coded a Linux font directory,
+   `/usr/share/fonts/truetype/crosextra`. It therefore could not run on the
+   machine that owns the project: the one-page PDF in the repository had been
+   generated elsewhere and shipped. For a competition that asks for the source
+   code, a deliverable whose generator does not run on the author's machine is
+   the same failure as a number without a script. The font is now resolved from
+   a candidate list (Carlito where Linux and LibreOffice put it, then Calibri on
+   Windows and macOS, plus a BIA_WRITEUP_FONT_DIR override), and the failure
+   message names every path it tried. Carlito and Calibri are metric-compatible,
+   so either produces the same line breaks and the same one-page fit.
+2. `requirements.txt` never listed `reportlab`, which that script imports. A
+   fresh clone could not rebuild the write-up. Added, marked as needed only to
+   REBUILD the PDF, since the PDF itself is committed.
+
+**The write-up now verifies itself.** The brief's two hard constraints, one page
+and nothing below 11 pt, were checked by hand. They are now checked by
+`verify_output()`, which re-reads the generated PDF, decodes the page stream
+(ASCII85 over Flate, both layers) and raises with the offending sizes. Current
+output: 1 page, sizes 11.0 / 11.5 / 14.0. Two bugs in that reader were found
+while writing it: the font resources are named /F1+0 so the name class cannot be
+\\w, and the stream body is not newline-delimited. The test count in the subtitle
+moved into an environment variable, so the PDF can no longer quietly disagree
+with the suite.
+
+**`check_repo.py`: what a `git add .` would publish, checked before it happens.**
+Nine checks: credentials, a committed .env, datasets and trial exports and the
+model cache, a leftover synthetic fixture, a generated report at the root,
+missing .gitignore rules, absolute machine paths, the presence of the write-up,
+and file size. It reads `git ls-files` plus untracked-and-not-ignored files, so
+it inspects the publication set rather than the working tree: an ignored 2 GB
+pickle is fine and says so, the same file one directory higher is a failure. The
+fixture check deliberately walks the whole tree instead, because rule 9 is about
+what the machine can pick up, not about what git would commit.
+
+**19 tests, each planting the mistake its check is supposed to catch.** Two of
+them found real bugs in the checker: a Windows path written escaped
+("C:\\\\Users\\\\...", the way it appears in Python source) slipped past a
+single-separator pattern, and the credential-shaped literals in the test file
+were themselves reported, correctly. The second one had two possible answers:
+exempt the test file, or stop writing credential-shaped literals. Exempting the
+file would have put a hole in the scanner to make its own test pass, so the fake
+keys are assembled at run time instead. My own comment quoting a raw Windows
+path tripped the same check afterwards, which is the check working.
+
+**Published on purpose.** Theo's call: the one-page write-up stays in the
+repository so a visitor can reconstruct the whole context. `.gitignore` now says
+so explicitly with `!docs/*.pdf` and `!docs/*.html`, `dryrun_*` is ignored
+everywhere, and the dead `reports/` patterns are gone. `check_repo.py` fails if
+the write-up is absent, so publishing it is now a rule rather than a habit.
+
+**State.** Suite **288 tests**. `python check_repo.py` green on the real
+repository, which is itself a test.
+
+**Time.** ~2 h.
+
+---
 ## It's top secret at least for the moment
 ---
