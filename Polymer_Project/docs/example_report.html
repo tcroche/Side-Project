@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backtest Integrity Audit</title><style>
+:root{
+  --page:#f1f1ee;    /* the desk the sheet sits on */
+  --sheet:#ffffff;
+  --ink:#131313;
+  --ink-2:#6a6a66;
+  --rule:#e3e3df;
+  --rule-2:#c9c9c3;
+  --flag:#c8371b;    /* a failing verdict. Nothing else is ever this colour. */
+  --model:#35638f;   /* the model tier. Nothing else is ever this colour.    */
+  --sans:"Segoe UI Variable Display","Segoe UI Variable Text","Segoe UI",
+         Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"Cascadia Mono",Consolas,"SF Mono","DejaVu Sans Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:15px/1.55 var(--sans);font-weight:400}
+.sheet{max-width:1180px;margin:26px auto;background:var(--sheet);
+  border:1px solid var(--rule);padding:30px 44px 40px}
+a{color:inherit;text-decoration:none}
+a:focus-visible{outline:2px solid var(--flag);outline-offset:3px}
+
+/* ---- machine-written things ---- */
+.mono,code,pre,td.num,th.num,.where,.kvblock,.runline,.serial,.chart text{
+  font-family:var(--mono);font-variant-numeric:tabular-nums}
+.label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-2);margin:0;font-weight:600}
+
+/* ---- top bar ---- */
+.topbar{display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--ink);padding-bottom:10px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.06em;font-size:15px}
+.brand span{font-weight:400;letter-spacing:.15em;font-size:10px;color:var(--ink-2);
+  margin-left:14px;text-transform:uppercase}
+
+/* ---- masthead ---- */
+.masthead{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.72fr)
+  minmax(0,1.05fr);column-gap:38px;row-gap:22px;padding:34px 0 30px}
+h1{font-size:54px;line-height:1;letter-spacing:-.032em;font-weight:600;
+  margin:0;max-width:16ch}
+.standfirst{margin:18px 0 0;color:var(--ink-2);font-size:16px;max-width:34ch}
+.runline{margin:20px 0 0;font-size:10.5px;line-height:1.7;color:var(--ink-2);
+  word-break:break-word}
+.hero-val{font-size:60px;line-height:1;letter-spacing:-.035em;font-weight:600;
+  margin:12px 0 0;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hero.fail .hero-val,.hero.fail .hero-verdict{color:var(--flag)}
+.hero-note{margin:14px 0 0;font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-2)}
+.hero-verdict{margin:6px 0 0;font-size:17px;font-weight:600;letter-spacing:.07em}
+.chart-cap{margin:8px 0 0;font-size:11px;color:var(--ink-2);line-height:1.45}
+svg.chart{width:100%;height:auto;display:block}
+.chart text{font-size:8.5px;fill:var(--ink-2)}
+
+/* ---- the four-tier strip ---- */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+.cell{padding:16px 20px 18px;display:block;border-left:1px solid var(--rule)}
+.cell:first-child{border-left:none}
+.cell .label{display:flex;align-items:center}
+.cell-val{font-size:34px;line-height:1.05;letter-spacing:-.03em;font-weight:600;
+  margin:10px 0 2px;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cell-state{font-size:13.5px}
+.cell[data-tier="measured"] .cell-state.fail{color:var(--flag)}
+.cell[data-tier="model"] .cell-val,.cell[data-tier="model"] .cell-state{color:var(--model)}
+.cell[data-tier="model"]{border-left:1px dashed var(--model)}
+.cell[data-tier="unseen"] .cell-val,.cell[data-tier="unseen"] .cell-state{color:var(--ink-2)}
+a.cell:hover{background:#fafaf9}
+.tick{display:inline-block;width:8px;height:4px;border-left:2px solid var(--flag);
+  border-bottom:2px solid var(--flag);transform:rotate(-45deg);flex:none;
+  margin:0 8px 2px 0}
+
+/* ---- sections ---- */
+.sec{padding:34px 0 6px;border-top:1px solid var(--rule)}
+.sec:first-of-type{border-top:none}
+.sec-head{display:flex;align-items:baseline;margin-bottom:22px}
+.serial{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-right:20px;
+  color:var(--rule-2);flex:none}
+.sec[data-tier="model"] .serial{color:var(--model)}
+h2{font-size:19px;letter-spacing:.02em;text-transform:uppercase;font-weight:600;
+  margin:0}
+h3{font-size:15px;font-weight:600;margin:26px 0 6px;letter-spacing:.01em}
+p{margin:9px 0}
+.cols{display:grid;grid-template-columns:minmax(0,290px) minmax(0,1fr);
+  column-gap:44px;row-gap:20px;align-items:start}
+.duo{display:grid;grid-template-columns:1fr 1fr;column-gap:44px;row-gap:26px}
+.lead{color:var(--ink-2);max-width:44ch;margin-top:0}
+.kv{max-width:78ch}
+
+/* ---- key/value block, the run's own facts ---- */
+.kvblock{font-size:12.5px;line-height:1.85;margin:16px 0 0}
+.kvblock div{display:flex;justify-content:space-between;border-bottom:1px dotted var(--rule)}
+.kvblock span:last-child{color:var(--ink);padding-left:16px;text-align:right}
+.kvblock span:first-child{color:var(--ink-2)}
+.kvblock .fail{color:var(--flag);font-weight:600}
+
+/* ---- data ---- */
+table{border-collapse:collapse;width:100%;margin:10px 0 4px;font-size:13px}
+th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+  color:var(--ink-2);text-align:left;padding:0 12px 7px 0;
+  border-bottom:1px solid var(--ink)}
+td{padding:7px 12px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+td:last-child,th:last-child{padding-right:0}
+td.num,th.num{text-align:right;font-family:var(--mono);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.cont td{color:var(--ink-2);border-bottom-style:dashed}
+.prov td:first-child{white-space:nowrap;width:1%;padding-right:22px}
+td.fail{color:var(--flag)}
+.prob{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-2);margin-top:2px}
+
+/* ---- concentration bar ---- */
+.bar{height:26px;display:flex;margin:14px 0 6px;border:1px solid var(--rule)}
+.bar i{display:block;height:100%}
+.bar .top{background:var(--flag)}
+.bar .rest{background:var(--rule)}
+.bar-key{font-size:11.5px;color:var(--ink-2);display:flex;flex-wrap:wrap}
+.bar-key span{margin-right:22px}
+.swatch{display:inline-block;width:9px;height:9px;margin-right:6px}
+.swatch.top{background:var(--flag)}
+.swatch.rest{background:var(--rule)}
+
+/* ---- counts ---- */
+.count{border:1px solid var(--rule);padding:16px 18px;margin:0 0 4px;
+  display:flex;align-items:baseline}
+.sec[data-tier="model"] .count{border:1px dashed var(--model)}
+/* Direct child only: a <b> inside the count's prose must stay prose. */
+.count>b{font-size:40px;line-height:.9;letter-spacing:-.03em;font-weight:600;
+  margin-right:14px;font-family:var(--mono)}
+.sec[data-tier="model"] .count>b{color:var(--model)}
+.count .label{margin-bottom:4px}
+.count p{margin:4px 0 0;font-size:12.5px;color:var(--ink-2);max-width:38ch}
+
+/* ---- findings ---- */
+.panel{border-top:1px solid var(--ink);margin-top:26px}
+.panel-head{font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  font-weight:600;padding:9px 0;border-bottom:1px solid var(--rule)}
+.find{display:grid;grid-template-columns:minmax(0,330px) minmax(0,1fr);
+  column-gap:40px;padding:20px 0;border-bottom:1px solid var(--rule)}
+.find-id{display:flex;align-items:baseline;flex-wrap:wrap}
+.find-id>*{margin:0 10px 6px 0}
+.find-no{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.where{font-size:11.5px;color:var(--ink-2);word-break:break-all;flex-basis:100%}
+pre.snippet{font-size:11.5px;line-height:1.5;background:#fafaf8;
+  border-left:2px solid var(--rule-2);padding:8px 11px;margin:10px 0 0;
+  overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.panel.sem pre.snippet{border-left:2px dashed var(--model)}
+.f{margin:0 0 12px;max-width:70ch}
+.f:last-child{margin-bottom:0}
+.f b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-2);margin-bottom:2px}
+.tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+  border:1px solid var(--rule-2);padding:3px 8px;white-space:nowrap}
+.tag-review{border-color:var(--model);color:var(--model)}
+.tag-medium,.tag-high{border-color:var(--flag);color:var(--flag)}
+.tag-novel{border-color:var(--ink);color:var(--ink)}
+
+/* ---- notes, not-run, checklist ---- */
+.note{border-left:2px solid var(--rule-2);padding:2px 0 2px 14px;margin:12px 0;
+  font-size:12.5px;color:var(--ink-2);max-width:74ch}
+.notrun{border:1px dashed var(--ink-2);padding:16px 18px;margin:4px 0;
+  max-width:76ch}
+.notrun b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;margin-bottom:5px}
+.epistemic{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  padding:12px 0;margin:0 0 18px;font-size:13.5px;max-width:80ch}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);column-gap:16px;row-gap:16px;
+  margin-top:6px}
+.card{border-top:1px solid var(--rule-2);padding:12px 0 0}
+.card .n{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.card p{font-size:13px;margin:7px 0 0}
+code{font-size:12px}
+footer{display:flex;justify-content:space-between;border-top:1px solid var(--ink);
+  margin-top:34px;padding-top:11px;font-size:11px;color:var(--ink-2);flex-wrap:wrap}
+footer p{margin:0;max-width:74ch}
+
+@media (max-width:1000px){
+  .sheet{padding:24px 22px 32px;margin:0}
+  .masthead{grid-template-columns:1fr;padding:26px 0 24px}
+  h1{font-size:42px;max-width:none}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .cell:nth-child(3){border-left:1px dashed var(--model)}
+  .cell:nth-child(odd){border-left:none}
+  .cell:nth-child(n+3){border-top:1px solid var(--rule)}
+  .cols,.duo{grid-template-columns:1fr}
+  .find{grid-template-columns:1fr;row-gap:14px}
+  .cards{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:520px){
+  h1{font-size:32px}
+  .hero-val{font-size:44px}
+  .strip{grid-template-columns:1fr}
+  .cell{border-left:none!important;border-top:1px solid var(--rule)}
+  .cell:first-child{border-top:none}
+  .cards{grid-template-columns:1fr}
+}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff;font-size:9.5pt}
+  .sheet{margin:0;padding:0;border:none;max-width:none}
+  h1{font-size:34pt}
+  .hero-val{font-size:30pt}
+  .cell-val{font-size:20pt}
+  .masthead{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);row-gap:14px}
+  .masthead>div:last-child{grid-column:1/-1}
+  .cols{grid-template-columns:minmax(0,190px) minmax(0,1fr);column-gap:26px}
+  .duo{column-gap:26px}
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .find,table,.note,.notrun,.count,.card,.strip{break-inside:avoid;
+    page-break-inside:avoid}
+  h2,h3,.sec-head{break-after:avoid;page-break-after:avoid}
+  .sec{padding-top:16px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="sheet">
+<div class="topbar"><p class="brand">BIA<span>Backtest Integrity Auditor</span></p>
+<p class="label">Run 2026-08-16 19:47:45</p></div>
+<header class="masthead">
+<div><h1>Backtest Integrity Audit</h1><p class="standfirst">Statistical validity and code integrity, examined separately and reported separately.</p>
+<p class="runline">Generated 2026-08-16 19:47:45  |  16 file(s) scanned  |  0 deterministic finding(s)  |  2 semantic finding(s) to verify</p></div>
+<div class="hero fail"><p class="label">DSR (measured)</p><p class="hero-val">0.929</p><p class="hero-note">threshold 0.950</p><p class="hero-verdict">REJECT</p></div>
+<div><svg class="chart" viewBox="0 0 320 118" role="img" aria-label="Deflated Sharpe ratio under 5 assumptions: 0.929, 0.922, 0.922, 0.170, 0.852. All below the 0.95 threshold." xmlns="http://www.w3.org/2000/svg"><line x1="34.0" y1="12.0" x2="34.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><line x1="34.0" y1="108.0" x2="310.0" y2="108.0" stroke="var(--rule)" stroke-width="1"/><text x="29.0" y="111.0" text-anchor="end">0.00</text><line x1="34.0" y1="60.0" x2="310.0" y2="60.0" stroke="var(--rule)" stroke-width="1"/><text x="29.0" y="63.0" text-anchor="end">0.50</text><line x1="34.0" y1="12.0" x2="310.0" y2="12.0" stroke="var(--rule)" stroke-width="1"/><line x1="34.0" y1="16.8" x2="310.0" y2="16.8" stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 3"/><text x="29.0" y="19.8" text-anchor="end" fill="var(--ink)">0.95</text><line x1="34.0" y1="24.8" x2="34.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><circle cx="34.0" cy="18.8" r="3.6" fill="var(--flag)"/><line x1="103.0" y1="25.4" x2="103.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><circle cx="103.0" cy="19.4" r="3.6" fill="var(--flag)"/><line x1="172.0" y1="25.4" x2="172.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><circle cx="172.0" cy="19.4" r="3.6" fill="var(--flag)"/><line x1="241.0" y1="97.6" x2="241.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><circle cx="241.0" cy="91.6" r="3.6" fill="var(--flag)"/><line x1="310.0" y1="32.2" x2="310.0" y2="108.0" stroke="var(--rule-2)" stroke-width="1"/><circle cx="310.0" cy="26.2" r="3.6" fill="var(--flag)"/></svg><p class="chart-cap">One dot per row of the sensitivity table in section 01: the DSR under each assumption about the number of trials and about V[SR]. The dashed line is the 0.95 threshold; every assumption lands below it.</p></div>
+</header>
+<div class="strip"><a class="cell" data-tier="measured" href="#s01"><p class="label"><span class="tick"></span>Measured</p><p class="cell-val">0.929</p><p class="cell-state fail">Rejects at 0.95</p><p class="label" style="margin-top:8px">Deflated Sharpe ratio, probability in [0,1]</p></a><a class="cell" data-tier="parsed" href="#s02"><p class="label"><span class="tick"></span>Parsed</p><p class="cell-val">0</p><p class="cell-state">Clean</p><p class="label" style="margin-top:8px">Deterministic rules over 16 file(s)</p></a><a class="cell" data-tier="model" href="#s03"><p class="label">Model</p><p class="cell-val">2</p><p class="cell-state">To verify</p><p class="label" style="margin-top:8px">2 outside the rules&#x27; reach, none verified here</p></a><a class="cell" data-tier="unseen" href="#s04"><p class="label">Unseen</p><p class="cell-val">5</p><p class="cell-state">Open questions</p><p class="label" style="margin-top:8px">Properties of the data, invisible to any code reader</p></a></div>
+<main>
+<section class="sec" data-tier="measured" id="s01"><div class="sec-head"><span class="serial">01</span><h2>Statistical deflation</h2></div><p class="epistemic">PSR, DSR and PBO below are <b>probabilities in [0, 1]</b>, never Sharpe ratios. A DSR of 0.92 against a 0.95 threshold is a rejection, not a degraded Sharpe ratio.</p>
+<h3>Universe with RUT</h3>
+<div class="cols">
+<div><p class="lead">The selected configuration is deflated against the best of N trials under the null that no trial has skill, then cross-validated for overfitting and inspected for concentration.</p><div class="kvblock"><div><span>selected configuration</span><span class="">t08</span></div><div><span>observations</span><span class="">103</span></div><div><span>grid trials</span><span class="">18</span></div><div><span>trials in total</span><span class="">21</span></div><div><span>moment estimator</span><span class="">simple</span></div><div><span>Sharpe, per period</span><span class="">0.120892</span></div><div><span>Sharpe, annualized</span><span class="">1.9191</span></div><div><span>DSR</span><span class="fail">0.929</span></div><div><span>threshold</span><span class="">0.950</span></div><div><span>verdict</span><span class="fail">REJECT</span></div></div></div>
+<div>
+<table><tr><th>Quantity</th><th class='num'>Value</th><th>Reading</th></tr>
+<tr><td>PSR vs zero <span class='prob'>probability in [0,1]</span></td><td class='num'>0.969</td><td>Probability the true Sharpe ratio exceeds zero.</td></tr>
+<tr><td>DSR <span class='prob'>probability in [0,1]</span></td><td class='num fail'>0.929</td><td>Probability the true Sharpe ratio exceeds E[max SR] over 18 trials. Threshold 0.95.</td></tr>
+<tr><td>E[max SR] under H0</td><td class='num'>0.4071</td><td>Annualized Sharpe ratio the best of N lucky trials would show.</td></tr>
+<tr><td>MinTRL, observed moments</td><td class='num'>129 periods</td><td>Observations needed to clear the threshold.</td></tr>
+<tr><td>MinTRL, if returns were normal</td><td class='num'>301 periods</td><td>The gap between these two lines is the track record that non-normality is buying, or costing.</td></tr>
+<tr><td>Skewness / kurtosis</td><td class='num'>+6.28 / 52.59</td><td>Variance term 0.429: below 1, so non-normality is INFLATING the probability.</td></tr>
+<tr><td>Mean pairwise trial correlation</td><td class='num'>+0.915</td><td>How much the trials repeat one another.</td></tr>
+</table></div></div>
+<h3>Sensitivity of the DSR to N and to V[SR]</h3>
+<div class="cols"><div>
+<p class="lead">V[SR] in per-period units: empirical across the grid 1.914e-04, across all trials 2.230e-04, theoretical under H0 (1/T, T=103) 9.709e-03; ratio empirical/theoretical 0.02. Trials are far less dispersed than independent noise would be: they are highly correlated, so N overstates the number of independent bets.</p>
+</div><div>
+<table><tr><th class='num'>N</th><th>V[SR] source</th><th class='num'>E[max SR] ann.</th><th class='num'>DSR</th><th>Verdict</th></tr>
+<tr><td class='num'>18</td><td>empirical, grid trials</td><td class='num'>0.4071</td><td class='num'>0.929</td><td>REJECT</td></tr>
+<tr><td class='num'>21</td><td>empirical, all trials</td><td class='num'>0.4557</td><td class='num'>0.922</td><td>REJECT</td></tr>
+<tr><td class='num'>30</td><td>empirical, grid trials</td><td class='num'>0.4553</td><td class='num'>0.922</td><td>REJECT</td></tr>
+<tr><td class='num'>18</td><td>marginal 1/T (raw)</td><td class='num'>2.8998</td><td class='num'>0.170</td><td>REJECT</td></tr>
+<tr class='cont'><td class='num'>18</td><td>same row, shrunk by (1-rho)</td><td class='num'>n/a</td><td class='num'>0.852</td><td>REJECT</td></tr>
+</table>
+<p class="note">The shrunk line re-reads the row above it after discounting N by the correlation between trials: highly correlated configurations are not independent bets. It carries no E[max SR] of its own, which is why that cell reads n/a rather than blank.</p>
+</div></div>
+<h3>Where the profit actually came from</h3>
+<div class="cols"><div>
+<p class="lead">Verdict <b>SINGLE-EVENT (one observation carries the result)</b>. Sharpe 1.92 on the full sample, 1.11 with the single best observation removed. 3 observation(s) removed take the total to zero.</p>
+</div><div>
+<div class="bar" role="img" aria-label="The single best observation carries 69.7% of the total return"><i class="top" style="width:69.7%"></i><i class="rest" style="width:30.3%"></i></div><p class="bar-key"><span><i class="swatch top"></i>2025-04-09, 69.7% of the total</span><span><i class="swatch rest"></i>every other observation, 30.3%</span></p>
+<p class="kv">Top 3 observations 104.8% of the total, so everything outside them is net negative; 39.8% of observations are positive; median -0.00005.</p>
+<table><tr><th>Observation</th><th class='num'>Configurations depending on it</th></tr>
+<tr><td>2025-04-09</td><td class='num'>18 / 18</td></tr>
+</table>
+<p class="note">When every cell of a grid leans on the same observation, the grid was never exploring different strategies: it was re-expressing one event.</p>
+</div></div>
+<h3>Backtest overfitting (CSCV)</h3>
+<div class="cols"><div>
+<p class="lead">PBO <b>0.914</b>, the probability in [0,1] that the in-sample winner is below median out-of-sample, from 70 combinations of 8 blocks over 96 observations and 18 configurations. Median out-of-sample rank of the winner 0.211; degradation slope -1.22.</p>
+</div><div>
+<svg class="chart" viewBox="0 0 320 82" role="img" aria-label="Observed PBO 0.914 against a simulated null centred on 0.511" xmlns="http://www.w3.org/2000/svg"><rect x="67.0" y="35" width="198.7" height="22" fill="var(--rule)"/><line x1="12.0" y1="46.0" x2="308.0" y2="46.0" stroke="var(--ink)" stroke-width="1"/><line x1="163.1" y1="33" x2="163.1" y2="59" stroke="var(--ink-2)" stroke-width="1"/><text x="163.1" y="71" text-anchor="middle">null mean 0.51</text><polygon points="282.6,43 277.6,31 287.6,31" fill="var(--flag)"/><text x="282.6" y="27" text-anchor="end" fill="var(--flag)">observed 0.914</text><text x="12.0" y="71" text-anchor="start">0</text><text x="308.0" y="71" text-anchor="end">1</text></svg>
+<p class="chart-cap">Simulated null at the same dimensions (pure noise, same T, N and S): mean 0.511, standard deviation 0.205, 90% interval [0.186, 0.857]. The observed PBO sits at percentile <b>0.99</b> of that null. Higher than 90% of no-skill datasets: evidence of selection overfitting.</p>
+<p class="note">7 trailing observation(s) dropped so that T divides evenly by S; this is the standard CSCV trimming.</p>
+<p class="note">Blocks hold 12 observations. Serial dependence across block boundaries is destroyed by recombination, so PBO is optimistic if the returns are strongly autocorrelated.</p>
+</div></div></section>
+<section class="sec" data-tier="parsed" id="s02"><div class="sec-head"><span class="serial">02</span><h2>Code findings (deterministic)</h2></div><div class="duo"><div>
+<p class="lead">Exact syntactic matches from the Python parser: 8 rules, line numbers taken from the AST. They run offline, cost nothing and give the same answer on every run.</p>
+</div><div>
+<div class="count"><b>0</b><div><p class="label">findings</p><p>16 file(s) scanned. No deterministic leakage pattern matched. This is a statement about the CODE only: it says nothing about how many configurations were tried, nor about the vintage of the data.</p></div></div>
+</div></div></section>
+<section class="sec" data-tier="model" id="s03"><div class="sec-head"><span class="serial">03</span><h2>Semantic findings (model), to verify</h2></div><div class="duo"><div>
+<p class="lead">A language model reads what no syntactic rule can express. Line numbers were verified against the file and snippets extracted from the real source by this tool, but the REASONING is the model&rsquo;s: <b>each one is a question, not a verdict</b>, and they are never merged into the deterministic section above. Prompt <code>1.2.0</code>.</p>
+</div><div>
+<div class="count"><b>2</b><div><p class="label">questions to verify</p><p>0 rejected by grounding &middot; 0 severity capped at review by the harness &middot; 0 corroborating a deterministic rule &middot; <b>2 outside the rules&rsquo; reach</b>. The last number is the semantic pass&rsquo;s actual contribution: the rest restates what section 02 already found deterministically.</p></div></div>
+</div></div>
+<div class="panel sem"><p class="panel-head">Semantic review findings, unverified</p>
+<div class="find"><div><div class="find-id"><span class="find-no">01</span><span class="tag tag-review">REVIEW</span><span class="tag tag-novel">novel</span><span class="where">m2_backtester\backtester.py:36-38</span></div><pre class='snippet'>prev_pos = np.concatenate([[0.0], pos[:-1]])   # position a la barre precedente (0 avant l&#x27;ouverture)</pre></div><div><p class='f'><b>Question</b>The fee for a position change at bar t is computed using P[t] (line 38: `fees_bar = config.BASIS_POINT * np.abs(dpos) * P`). If the strategy signal is generated on bar t&#x27;s close and the trade is executed at bar t+1&#x27;s open (or close), then multiplying by P[t] is an approximation but not a look-ahead issue per se. However, if pos[t] already incorporates bar t&#x27;s close price to decide the trade, and the fee is also charged at P[t], this is self-consistent. The concern is whether `strategy.compute_positions` uses bar t&#x27;s close to set pos[t], meaning the position change dpos[t] = pos[t] - pos[t-1] is charged at P[t] — the same price used to generate the signal — which could be look-ahead if the signal requires knowing the close before trading at that close.</p><p class='f'><b>Fact to verify</b>Verify whether strategy.compute_positions() returns a position that is meant to be decided at bar-close t and executed at bar-open t+1, or decided and executed at bar-close t; the fee calculation charges fees on position changes at bar t using P[t] (the same bar&#x27;s close price), which is consistent only if execution happens at that close.</p><p class='f'><b>Suggested fix</b>If strategy.compute_positions() generates signals using bar t&#x27;s close and trades are executed at bar t+1&#x27;s open, shift the fee price vector: use P[1:] for position changes on bars 1..n-1 and P[0] for the initial entry, or use a separate execution-price series. If trades are executed at bar t&#x27;s close (same bar as signal), the current code is correct and no change is needed.</p></div></div>
+<div class="find"><div><div class="find-id"><span class="find-no">02</span><span class="tag tag-review">REVIEW</span><span class="tag tag-novel">novel</span><span class="where">m2_backtester\strategy_trend.py:27-48</span></div><pre class='snippet'>for t in range(n):</pre></div><div><p class='f'><b>Question</b>At each bar t the loop computes z from prices[t] (the current bar&#x27;s close), decides to enter/exit, and writes the resulting position into pos[t]. If the engine treats pos[t] as the position active during bar t — i.e., the trade is filled at the same close price used to generate the signal — the strategy is buying/selling at the exact price it just observed, which is look-ahead bias (signal and fill share the same close). Only if the engine shifts consumption by one bar (pos[t] drives the trade executed at bar t+1&#x27;s open or close) is there no leakage.</p><p class='f'><b>Fact to verify</b>Verify whether pos[t] is consumed by the backtesting engine as the position held during bar t (same-bar execution) or as the order that takes effect at bar t+1 (next-bar execution).</p><p class='f'><b>Suggested fix</b>If the engine executes pos[t] during bar t (same-bar fill), shift the output series by one bar: return pd.Series(pos, index=close.index, name=&#x27;position&#x27;).shift(1). If the engine already applies a one-bar lag between signal and execution, no change is needed.</p></div></div>
+</div></section>
+<section class="sec" data-tier="unseen" id="s04"><div class="sec-head"><span class="serial">04</span><h2>What this audit cannot see</h2></div><div class="duo"><div><p class="lead">These are properties of the DATA, not of the code. Presenting them as questions rather than as detections is the point: a static analyser cannot decide them, and claiming otherwise would be the same overstatement this tool exists to catch.</p></div><div></div></div><div class="cards"><div class="card"><span class="n">01</span><p>Is the trading universe defined from constituents as of each date, or from today&#x27;s index membership? Static analysis cannot tell these apart.</p></div><div class="card"><span class="n">02</span><p>Are fundamental or accounting inputs point-in-time, or restated values attributed to their original date?</p></div><div class="card"><span class="n">03</span><p>Do corporate actions, delistings and halted names appear in the history, or were they dropped when the data was pulled?</p></div><div class="card"><span class="n">04</span><p>Does the transaction-cost model reflect the liquidity actually available at the size being simulated?</p></div><div class="card"><span class="n">05</span><p>How many configurations were tried in total, including the ones that were abandoned and never written down?</p></div></div></section>
+<section class="sec" data-tier="record" id="s05"><div class="sec-head"><span class="serial">05</span><h2>Provenance</h2></div><p class="lead">Every figure above is produced by a script in this repository and can be recomputed from the command below. The two charts are drawn from the same fields as the tables beside them.</p><table class='prov'><tr><th>Item</th><th>Value</th></tr><tr><td>generated</td><td><code>2026-08-16 19:47:45</code></td></tr><tr><td>command</td><td><code>python run_report.py --code m2_backtester --llm --out rapport_m2.html --trials data\trials_m2_with_rut.csv --meta data\trials_m2_meta.csv --sharpe-col sharpe_annual_with_rut --label Universe with RUT</code></td></tr><tr><td>code audited</td><td><code>m2_backtester (16 .py file(s))</code></td></tr><tr><td>deflation input</td><td><code>data\trials_m2_with_rut.csv + data\trials_m2_meta.csv</code></td></tr><tr><td>semantic pass</td><td><code>prompt 1.2.0</code></td></tr><tr><td>python</td><td><code>3.12.7</code></td></tr><tr><td>model cache</td><td><code>16 hit(s), 0 miss(es)</code></td></tr></table></section>
+</main>
+<footer><p>Backtest Integrity Auditor. PSR, DSR and PBO are probabilities in
+[0, 1], never Sharpe ratios. Deterministic and semantic findings are reported in
+separate sections and are never merged. Solid rules mark what this tool verified
+itself; dashed rules mark what a language model proposed and nobody has checked.</p>
+<p>2026-08-16 19:47:45</p>
+</footer>
+</div>
+</body></html>
