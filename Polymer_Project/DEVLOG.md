@@ -649,7 +649,6 @@ Streamlit UI on top, if time allows, otherwise the HTML is the demo.
  
 **Time.** ~2.5 h.
  
----
 --- 
 ## 2026-08-16 - Day 4: B5 confirmed on the real case; the fixture can no longer clobber the export
 
@@ -718,74 +717,87 @@ preview. The write-up subtitle still says 246 tests; regenerate it once with
 the final count before submission. Then README and repository cleanup.
 
 **Time.** ~1 h.
-
 ---
 
-## 2026-08-16 (later) - Day 4B: the report gets a visual system, and the system carries meaning
+## 2026-08-16 (later) - Day 4B: the report gets a visual system, in two passes
 
 **Why touch a working page at all.** Theo's verdict on the rendered report:
 readable and clear, and instantly recognisable as machine-styled. That matters
-here more than on an ordinary page. This document is the demo: if it looks
+more here than on an ordinary page. This document is the demo: if it looks
 generated, the reader discounts what it says, and what it says is the whole
 project.
 
-**The brief, pinned before any CSS.** Subject: a forensic audit of a backtest.
-Audience: a reader who must not confuse a measurement with a model's opinion.
-The single job of the page: keep four kinds of evidence apart while making the
-result legible in ninety seconds, on screen and on A4.
+**First pass, superseded.** I designed an audit-workpaper direction: pale green
+stock, a serif document face, a provenance gutter down the left of every block.
+Theo then sent a reference of what to aim for, so the palette and the type went
+with it. What survived is the part that was never decoration, and the reason it
+survived is that it encodes something true:
 
-**The signature, and why it is not decoration.** Every block now carries its
-PROVENANCE in a fixed gutter, and the four tiers are separated by LINE QUALITY
-before colour:
+    measured   solid rule, verification tick   arithmetic in this repository
+    parsed     solid rule, verification tick   Python AST, exact line numbers
+    model      DASHED rule, no tick            a question, not a measurement
+    unseen     no rule, no tick                outside any static analysis
 
-    measured   solid rule + verification tick   arithmetic in this repository
-    parsed     solid rule + verification tick   Python AST, exact line numbers
-    model      DASHED rule, no tick             a question, not a measurement
-    unseen     DOTTED rule, no tick             outside any static analysis
+Line quality before colour, because line quality survives grayscale printing,
+photocopying and colour blindness. The tick is the auditor's "vouched to
+source" mark, drawn with CSS borders so it needs no glyph and no font file, and
+it is deliberately absent from the model tier. Principle 4 used to live in the
+section headings alone. It now lives in the typography.
 
-Line quality was chosen over colour because it survives grayscale printing,
-photocopying and colour blindness, which colour does not, and because this is
-the one distinction the report may never blur. The tick is the auditor's
-"vouched to source" mark, drawn with CSS borders so it needs no glyph and no
-font file; it is deliberately absent from the model tier. Principle 4 used to
-live in the section headings alone. It now lives in the typography.
+**Second pass, from the reference.** Masthead with the headline probability at
+display size, a four-cell strip (one per tier, each stating what that tier
+returned), numbered sections, two-column bodies with the run's own facts as a
+mono key-value block on the left and the tables on the right, findings as
+panel rows rather than cards. Near-white sheet, black ink, and exactly two
+functional colours: red for a failing verdict, slate for the model tier.
+Nothing else on the page is coloured, and a test counts the occurrences of both
+tokens in the stylesheet so neither can spread into decoration.
 
-**Ledger strip under the masthead.** Four cells, one per tier, each stating
-what that tier actually returned with its unit and threshold named (DSR 0.929,
-rejects at 0.95 / 0 findings, 16 files / 2 questions, none verified / 5 open
-data questions). A tier that did not run keeps its cell and says "Not run":
-a missing cell would read as nothing to report, which is the failure mode the
-whole report is built against.
+**Where I refused to follow the reference, and why it matters more than the
+layout.** The mock-up was itself generated, and it had invented the content: a
+White's Reality Check with squared loss and a stationary bootstrap, a per-trial
+"DSR vs best" table over an out-of-sample window, a rising DSR curve across
+grid trials, "the codebase passed all 28 integrity checks". None of that exists
+here. The method is Bailey and Lopez de Prado (PSR, E[max SR], DSR, MinTRL,
+CSCV/PBO), the DSR is computed once for the selected configuration, the OOS is
+sealed and absent from the report, and there are 8 AST rules. A report that
+invented a method name would fail its own thesis in the first paragraph, and it
+is exactly the failure a reader at Polymer would enjoy catching. The layout was
+taken, the content was not.
 
-**Type and palette, both derived from the subject.** No web font is allowed
-(one file, opens offline), so the system is built from faces already on the
-machine: Constantia for the document, Consolas for everything machine-written
-(numbers, line references, labels, snippets), and no sans-serif at all. The
-palette is an audit workpaper: pale green-grey stock, near-black ink, and a
-single audit-pencil red used only for verdicts, rejections and the tick.
-Nothing else is coloured. No gradient, no shadow, no rounded corner, no script.
+**So the charts had to be earned.** Two of them, both drawn in render.py from
+the fields of the DeflationSection they sit beside, so no mark exists that is
+not a number the tool computed:
+- the DSR under every assumption of the sensitivity table, against the
+  threshold as a dashed tick on the axis, which shows the rejection is not an
+  artefact of one modelling choice;
+- the observed PBO placed inside its own simulated null, with the 90% interval
+  as a band and the null mean as a tick.
+Plus a single bar for concentration: one observation, 69.7% of the total. Every
+figure a chart shows also appears as text beside it, and a test asserts that,
+so nothing is carried by a mark alone.
 
-**Seven new tests, because a visual claim is worth exactly as much as a prompt
-rule.** The page hooks nothing external (no http, no link, no import, no url(),
-no script tag); severity and verdict survive the loss of colour as words; the
-model tier is typeset dashed and says so; the tick appears on the verified
-tiers and nowhere else; a tier that did not run still occupies its cell; the
-print rules target A4; ledger content is escaped like everything else. Suite:
-**264 tests**.
+**Nine tests, because a visual claim is worth exactly as much as a prompt rule.**
+The page hooks nothing external (no http, no link, no import, no url(), no
+script tag); severity and verdict survive the loss of colour as words; the
+model tier is bound to dashed rules in at least three places; the tick appears
+on the verified tiers and nowhere else; a tier that did not run still occupies
+its cell; the print rules target A4; every charted number is also written out;
+colour is rationed to two tokens; ledger content is escaped like everything
+else. Suite: **266 tests**.
 
-**Two defects fixed while re-reading the rendered page.** The correlation
-adjusted DSR row printed with two empty cells, which reads as missing data
-rather than as a continuation; it now repeats its N, says n/a where it has no
-E[max SR] of its own, and carries a one-line explanation. And the layout no
-longer depends on flex `gap`, which some PDF engines ignore: spacing that
-matters is margin, so labels cannot end up touching in print.
+**Three defects found by re-reading the rendered page.** `.count b` styled every
+bold inside the block, so a sentence in the semantic summary rendered at 40px:
+the direct-child selector the CSS guidance warns about, caught in a screenshot.
+The correlation-adjusted DSR row printed with two empty cells, which reads as
+missing data rather than as a continuation. And the layout no longer depends on
+flex `gap`, which some PDF engines ignore.
 
-**Not verified here.** I could not open the page in a modern browser from my
-side. The check was done in an old WebKit renderer that ignores CSS grid, so
-type, colour, rules, tables and escaping were reviewed but the two column
-composition was not. Theo opens it and reports.
+**Not verified here.** No modern browser on my side. The review was done in an
+old WebKit renderer that ignores CSS grid, so type, colour, rules, charts,
+tables and escaping were checked but the multi-column composition was not.
 
-**Time.** ~1.5 h.
+**Time.** ~3 h.
 
 ---
 ## It's top secret at least for the moment
