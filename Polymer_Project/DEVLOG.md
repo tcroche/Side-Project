@@ -892,5 +892,41 @@ repository, which is itself a test.
 **Time.** ~2 h.
 
 ---
-## It's top secret at least for the moment
+## 2026-08-16 (night) - Day 4E: MIT, and one more hole in my own scanner
+
+**Licence.** MIT, `LICENSE` at the root, copyright 2026. Without a licence file
+published code is all rights reserved by default, which is a strange signal on a
+repository one is inviting people to read. The README says what MIT does not
+cover: the 1-minute index data is course-provided and is not redistributed, and
+the write-up PDF is a submission published for context rather than a template.
+
+**`check_repo.py` gains a tenth check** so that the licence, like the write-up,
+is a rule rather than a habit: present, publishable, and not a truncated stub.
+
+**Writing that check found a real hole in the scanner.** The text reader used an
+allow-list of extensions, so it never opened a file without one. `LICENSE` has
+no extension, which is how the failure surfaced, but the consequence was much
+worse than a false negative on a licence: a credential sitting in a file called
+`credentials`, or in a `Dockerfile`, would never have been read at all. Reversed
+to a deny-list: everything is read except known binary suffixes and anything
+carrying a NUL byte in its first 8 KB. Two tests pin both directions, a secret
+in an extensionless file and a PNG that must not be scanned as text.
+
+Second time today that adding a small check exposed a bigger gap in the thing
+doing the checking. It is the benchmark lesson again, from a third angle: what
+you build to measure something ends up measuring you.
+
+**`.gitattributes` added** with `* text=auto` and the binary types marked. The
+project is written on Windows and read on Linux, and a diff full of CRLF noise
+hides the change that matters.
+
+**State.** Suite **292 tests**. `python check_repo.py` green. Simulated first
+commit: 65 files staged, the write-up PDF and the licence among them, every
+dataset, cache, fixture and generated report ignored. The write-up rebuilds and
+passes its own one-page and 11 pt check.
+
+**Time.** ~45 min.
+
+---
+## It's top secret at least for the moment (not any more)
 ---
