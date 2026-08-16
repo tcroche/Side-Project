@@ -800,5 +800,37 @@ tables and escaping were checked but the multi-column composition was not.
 **Time.** ~3 h.
 
 ---
+
+## 2026-08-16 (end of day) - Day 4C: punctuation as a rule, and the README
+
+**Em dashes out of everything the tool writes.** Theo's note: a French reader
+does not expect them, and they are a tell. Three places in `render.py` used
+one (the section 03 title, the findings panel header, the footer). All gone,
+and a test now fails if any em or en dash appears in a page BIA rendered.
+
+**The exception, which is the interesting half.** Text quoted from the model is
+NOT normalised. The finding on `backtester.py` contains "charged at P[t] - the
+same price used to generate the signal", with real em dashes, and it keeps
+them. A quotation is evidence: silently repunctuating it would mean the page no
+longer shows what the model actually said, which is the same failure as
+silently editing a snippet. The test pins both halves: no dash written by the
+tool, dashes preserved inside a quoted explanation.
+
+**Second real run of the day, on cache.** Identical figures, `16 hit(s), 0
+miss(es)`: the post-processing is deterministic and the report is reproducible
+from the cache exactly as claimed. Suite: **267 tests**.
+
+**README written.** Structure: the two failure modes, then the result the tool
+was built to produce (the M2 table), install and run, what the report contains
+and what its four provenance tiers mean, the two axes in detail, the benchmark
+WITH its three caveats (agreement is not discovery, exclusion compliance 2/8,
+in-distribution by construction), what the audit cannot see, the nine design
+rules and the mistake each one cost, layout, data and keys, references. Every
+number in it is one this repository prints; the repository URL is the only
+placeholder left.
+
+**Time.** ~1 h.
+
+---
 ## It's top secret at least for the moment
 ---
