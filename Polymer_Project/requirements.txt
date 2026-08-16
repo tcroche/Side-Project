@@ -13,9 +13,10 @@ anthropic>=0.34
 python-dotenv>=1.0
 PyYAML>=6.0
 
-# Report generator (Module 4)
-matplotlib>=3.8
-fpdf2>=2.7
+# Report generator (Module 4): the HTML report is rendered with the standard
+# library only (html.escape + an inlined stylesheet). It is a single
+# self-contained file that any browser prints to A4 PDF, so no PDF or plotting
+# dependency is required. Nothing to install here.
 
 # UI
 streamlit>=1.35
