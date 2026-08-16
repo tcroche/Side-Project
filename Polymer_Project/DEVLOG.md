@@ -720,5 +720,73 @@ the final count before submission. Then README and repository cleanup.
 **Time.** ~1 h.
 
 ---
+
+## 2026-08-16 (later) - Day 4B: the report gets a visual system, and the system carries meaning
+
+**Why touch a working page at all.** Theo's verdict on the rendered report:
+readable and clear, and instantly recognisable as machine-styled. That matters
+here more than on an ordinary page. This document is the demo: if it looks
+generated, the reader discounts what it says, and what it says is the whole
+project.
+
+**The brief, pinned before any CSS.** Subject: a forensic audit of a backtest.
+Audience: a reader who must not confuse a measurement with a model's opinion.
+The single job of the page: keep four kinds of evidence apart while making the
+result legible in ninety seconds, on screen and on A4.
+
+**The signature, and why it is not decoration.** Every block now carries its
+PROVENANCE in a fixed gutter, and the four tiers are separated by LINE QUALITY
+before colour:
+
+    measured   solid rule + verification tick   arithmetic in this repository
+    parsed     solid rule + verification tick   Python AST, exact line numbers
+    model      DASHED rule, no tick             a question, not a measurement
+    unseen     DOTTED rule, no tick             outside any static analysis
+
+Line quality was chosen over colour because it survives grayscale printing,
+photocopying and colour blindness, which colour does not, and because this is
+the one distinction the report may never blur. The tick is the auditor's
+"vouched to source" mark, drawn with CSS borders so it needs no glyph and no
+font file; it is deliberately absent from the model tier. Principle 4 used to
+live in the section headings alone. It now lives in the typography.
+
+**Ledger strip under the masthead.** Four cells, one per tier, each stating
+what that tier actually returned with its unit and threshold named (DSR 0.929,
+rejects at 0.95 / 0 findings, 16 files / 2 questions, none verified / 5 open
+data questions). A tier that did not run keeps its cell and says "Not run":
+a missing cell would read as nothing to report, which is the failure mode the
+whole report is built against.
+
+**Type and palette, both derived from the subject.** No web font is allowed
+(one file, opens offline), so the system is built from faces already on the
+machine: Constantia for the document, Consolas for everything machine-written
+(numbers, line references, labels, snippets), and no sans-serif at all. The
+palette is an audit workpaper: pale green-grey stock, near-black ink, and a
+single audit-pencil red used only for verdicts, rejections and the tick.
+Nothing else is coloured. No gradient, no shadow, no rounded corner, no script.
+
+**Seven new tests, because a visual claim is worth exactly as much as a prompt
+rule.** The page hooks nothing external (no http, no link, no import, no url(),
+no script tag); severity and verdict survive the loss of colour as words; the
+model tier is typeset dashed and says so; the tick appears on the verified
+tiers and nowhere else; a tier that did not run still occupies its cell; the
+print rules target A4; ledger content is escaped like everything else. Suite:
+**264 tests**.
+
+**Two defects fixed while re-reading the rendered page.** The correlation
+adjusted DSR row printed with two empty cells, which reads as missing data
+rather than as a continuation; it now repeats its N, says n/a where it has no
+E[max SR] of its own, and carries a one-line explanation. And the layout no
+longer depends on flex `gap`, which some PDF engines ignore: spacing that
+matters is margin, so labels cannot end up touching in print.
+
+**Not verified here.** I could not open the page in a modern browser from my
+side. The check was done in an old WebKit renderer that ignores CSS grid, so
+type, colour, rules, tables and escaping were reviewed but the two column
+composition was not. Theo opens it and reports.
+
+**Time.** ~1.5 h.
+
+---
 ## It's top secret at least for the moment
 ---
