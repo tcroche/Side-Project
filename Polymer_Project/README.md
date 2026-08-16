@@ -286,7 +286,7 @@ prompts/     code_auditor_v1.yaml                              versioned prompt 
 bench/       cases/, truth.py, score.py                        the seeded-bug benchmark
 report/      deflation.py, corroboration.py, render.py         the report layer
 docs/        build_writeup.py                                  the one-page PDF write-up
-tests/       267 tests
+tests/       292 tests
 run_audit.py  run_report.py  run_bench.py  run_real_case.py  run_deflation_demo.py
 make_dry_run_fixture.py  export_trials.py
 ```
