@@ -20,7 +20,7 @@ prints to A4 PDF from any browser.
 
 ## The result it was built to produce
 
-The demonstration case is my own M.Sc. backtester: an intraday momentum strategy on five
+The demonstration case is my ownMSc. backtester: an intraday momentum strategy on five
 equity indices, in-sample Sharpe **1.92** over 18 tuned configurations. My original write-up
 said the Sharpe "collapsed to a deflated 0.92", confusing a probability with a Sharpe ratio.
 BIA exists to catch exactly that.
