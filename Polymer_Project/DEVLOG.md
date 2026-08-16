@@ -585,6 +585,74 @@ B5 lands; the test count in the subtitle is re-read at the end.
 **Time.** ~1.5 h.
  
 --- 
+## 2026-08-16 - Day 4: B5 confirmed on the real case; the fixture can no longer clobber the export
 
+**B5 verified on my machine.** `python -m pytest`: 246 passed on Windows, Python
+3.12.7. The real report ran directly on the CSVs exported on 2026-08-11 (still
+in `data/`), no fixture involved:
+
+    python run_report.py --code m2_backtester --llm --out rapport_m2.html
+        --trials data\trials_m2_with_rut.csv --meta data\trials_m2_meta.csv
+        --sharpe-col sharpe_annual_with_rut --label "Universe with RUT"
+
+    files scanned 16 | deterministic 0 | semantic (to verify) 2 accepted,
+    0 rejected, 0 capped, 0 corroborating a rule, 2 outside the rules' reach |
+    deflation: DSR 0.9290 (REJECT), PBO 0.914 at percentile 0.99 of its null |
+    cache 1 hit, 15 misses
+
+Every headline number the handoff said the report must show is there: DSR
+0.929, PBO 0.914 at the 99th percentile, 0 deterministic findings, two
+semantic findings outside the rules' reach. The concentration figure (the
+2025-04-09 session at about 70 percent) lives in the page and is read there.
+Cache reading: only one of the 16 (prompt v1.2.0, source) pairs was already
+in `data/llm_cache`, the other 15 were fresh API calls; a second identical run
+replays all 16 from cache with deterministic post-processing.
+
+**A defect in my own tooling, found while writing the export instructions.**
+`make_dry_run_fixture.py` wrote the exact three names `export_trials.py`
+writes: `trials_m2_with_rut.csv`, `trials_m2_ex_rut.csv`, `trials_m2_meta.csv`.
+With the real CSVs present, one `python make_dry_run_fixture.py` would have
+replaced a multi-minute export with correlated noise, silently, and the
+sequence written for today did exactly that before the real run. Same family
+as "an empty section reads as clean": a synthetic file indistinguishable from
+a real one is the failure mode, not the fixture itself. Rule 9 said "delete
+the fixture afterwards", which is a request; two guarantees replace it:
+
+1. *Collision is impossible.* The fixture writes `dryrun_`-prefixed names
+   only, the real names are pinned in `REAL_EXPORT_FILES`, and the writer
+   raises on any of them. `run_real_case.py` gains `--dry-run` and reads the
+   prefixed files then, the real names otherwise; without the flag and with
+   only the fixture on disk it stops with "Missing", it never analyses
+   synthetic numbers under a real heading.
+2. *Passing as real is impossible.* Every metadata row of the fixture carries
+   `is_synthetic = True`. `run_report.py` reads the flag in code and stamps
+   SYNTHETIC FIXTURE on the page title, the subtitle, the section label, the
+   provenance row and the console, whatever `--label` says. `run_real_case.py`
+   prints the same banner first and last.
+
+`tests/test_fixture.py`, 10 tests: names disjoint and pinned on both sides,
+writer refuses the real names, layout unchanged (103 x 21, 18 grid + 3 sweep,
+one frozen cell), report on the fixture stamped in all five places under a
+misleading label, report on a real-layout input not stamped, real-case script
+stops without `--dry-run`. Suite: **257 tests** (246 + 10 + the new test file
+entering the self-audit corpus).
+
+**`.gitignore` had a hole.** It ignored `data/*.pkl` only. `data/trials_m2_*.csv`
+(derived from the course's proprietary 1-minute data), `data/llm_cache/` (raw
+model responses) and `rapport_*.html` at the root would all have gone into
+tomorrow's public repository on a `git add .`. Now ignored: `data/*.csv`,
+`data/llm_cache/`, `/*.html`; verified with `git status --ignored` on a
+scratch repository. Lesson in passing: a trailing `# comment` on a gitignore
+pattern line is part of the pattern; comments go on their own line.
+
+**Open.** Reading of `rapport_m2.html` itself: the 2025-04-09 share, the two
+semantic findings (severity, `external_dependency`, whether either is a rerun
+of the strategy_trend execution-assumption question), the layout in print
+preview. The write-up subtitle still says 246 tests; regenerate it once with
+the final count before submission. Then README and repository cleanup.
+
+**Time.** ~1 h.
+
+---
 ## It's top secret at least for the moment
 ---
