@@ -52,7 +52,7 @@ of its null: indistinguishable from noise, which is not the same thing as clean.
 Python 3.12.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/tcroche/Side-Project/tree/main/Polymer_Project
 cd Polymer
 python -m venv .venv && .venv\Scripts\activate      # Windows
 pip install -r requirements.txt
