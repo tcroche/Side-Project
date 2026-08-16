@@ -583,7 +583,73 @@ brief (`FirstName_LastName_University`); the "one command" sentences flip once
 B5 lands; the test count in the subtitle is re-read at the end.
  
 **Time.** ~1.5 h.
+
+---
  
+## 2026-08-15 (later) - Day 3B: the report layer (B5)
+ 
+**Goal.** One command that audits a backtest on both axes and writes a single
+document, with the separation between detectors preserved at the presentation
+layer, not just internally.
+ 
+**Built.**
+- `report/deflation.py` : the statistical half as DATA rather than printed
+  text. Returns `DeflationSection` with the deflation report, the sensitivity
+  rows (N and V[SR] varied), the concentration report, shared dependence, PBO
+  and its simulated null.
+- `report/corroboration.py` : the annotation layer. When a semantic finding
+  overlaps a deterministic one on the same file and lines, it is tagged
+  "corroborates R-x". The AST list is read-only; the annotation is attached to
+  the semantic side and counted, never merged. Overlap uses the same line-range
+  rule as the benchmark scorer, so the report and the benchmark cannot disagree
+  about what "the same finding" means.
+- `report/render.py` : a single self-contained HTML file. No external asset, no
+  CDN, no web font: it opens offline, can be mailed, and prints to A4 PDF from
+  any browser. Rendered with the standard library only.
+- `run_report.py` : the CLI. `--code` alone gives a code-only audit; `--trials`
+  and `--meta` add the deflation; `--llm` adds the semantic pass.
+- `tests/test_report.py` : 19 tests.
+**The number the report exists to show.** Of N semantic findings, how many
+merely restate a rule, and how many are outside the rules' reach. The benchmark
+measured that the model re-reports patterns the prompt told it to leave alone
+(exclusion compliance 2/8). Rather than pretend the instruction works, the
+report states the overlap, counts it, and labels the remainder "novel". That
+count is the semantic pass's actual contribution, and it is the honest thing to
+put in front of a reader.
+ 
+**Empty sections are the failure mode.** A report with no deflation section
+reads as a clean bill of health. So a missing section is rendered explicitly:
+"Not run", with the reason, plus the sentence that an empty section is not
+evidence of absence. Two tests assert that wording for the deflation and the
+semantic halves.
+ 
+**Three defects caught by tests before shipping.**
+1. *Path matching was silently host-dependent.* `os.path.basename` only treats
+   the HOST separator as one, so on Linux a Windows-spelled path matched
+   nothing and every corroboration would have been missed. On my own Windows
+   machine the bug would have been invisible. Separators are now normalised
+   explicitly.
+2. *Code snippets were not escaped.* Findings quote real code, and real code
+   contains `<`, `>` and `&`; the page would have been silently corrupted by a
+   finding on `df[df['a'] < 0] & mask`. Everything from source or from the
+   model is escaped, with a test that includes a `<script>` payload.
+3. *MinTRL prints `inf`* when the observed Sharpe never clears the benchmark.
+   True and unreadable; it now says so in words, on its own line, next to the
+   normal-returns figure so the gap between the two is legible.
+**Dry run first, as always.** The whole pipeline was exercised on the synthetic
+fixture (`make_dry_run_fixture.py`) and on the benchmark cases before any real
+data or any API call, and the semantic section was validated end to end with a
+stub client, no network. Suite: **246 tests**. Self-audit of the repository
+still clean. The write-up's `BIA_ONE_COMMAND` flag flipped to its true branch
+the moment `run_report.py` landed, and the PDF was regenerated.
+ 
+**Open.** Real-case report on the M2 export (the CSVs must be re-exported;
+the fixture was deleted so no synthetic number can leak into a real report).
+Streamlit UI on top, if time allows, otherwise the HTML is the demo.
+ 
+**Time.** ~2.5 h.
+ 
+---
 --- 
 ## 2026-08-16 - Day 4: B5 confirmed on the real case; the fixture can no longer clobber the export
 
