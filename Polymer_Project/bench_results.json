@@ -1,0 +1,759 @@
+{
+  "cases": 16,
+  "leaks": 11,
+  "scores": {
+    "AST only": {
+      "name": "AST only",
+      "n_detections": 9,
+      "tp": 9,
+      "fp": 0,
+      "tp_catalogue": 9,
+      "tp_semantic": 0,
+      "precision": 1.0,
+      "recall_catalogue": 1.0,
+      "recall_semantic": 0.0,
+      "recall_overall": 0.8181818181818182,
+      "f1": 0.9,
+      "clean_false_positives": 0,
+      "review_questions": 0,
+      "leaks_total_catalogue": 9,
+      "leaks_total_semantic": 2,
+      "per_case": {
+        "trap01_future_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap02_smoothed_signal.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap03_full_sample_scaler.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap04_backfilled_prices.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap05_fit_on_test.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap06_global_zscore.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap07_target_as_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap08_two_leaks.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "clean01_causal_engine.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean02_lagged_features.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean03_train_only_scaler.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean04_alignment_and_sharpe.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean05_expanding_norm.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "sem01_same_day_aggregate.py": {
+          "kind": "semantic",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "sem02_indexed_lookahead.py": {
+          "kind": "semantic",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "dep01_signal_only.py": {
+          "kind": "dependent",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        }
+      }
+    },
+    "LLM only": {
+      "name": "LLM only",
+      "n_detections": 9,
+      "tp": 9,
+      "fp": 0,
+      "tp_catalogue": 7,
+      "tp_semantic": 2,
+      "precision": 1.0,
+      "recall_catalogue": 0.7777777777777778,
+      "recall_semantic": 1.0,
+      "recall_overall": 0.8181818181818182,
+      "f1": 0.9,
+      "clean_false_positives": 0,
+      "review_questions": 1,
+      "leaks_total_catalogue": 9,
+      "leaks_total_semantic": 2,
+      "per_case": {
+        "trap01_future_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap02_smoothed_signal.py": {
+          "kind": "trapped",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "trap03_full_sample_scaler.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap04_backfilled_prices.py": {
+          "kind": "trapped",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "trap05_fit_on_test.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap06_global_zscore.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap07_target_as_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap08_two_leaks.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "clean01_causal_engine.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean02_lagged_features.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean03_train_only_scaler.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean04_alignment_and_sharpe.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean05_expanding_norm.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "sem01_same_day_aggregate.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "sem02_indexed_lookahead.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "dep01_signal_only.py": {
+          "kind": "dependent",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        }
+      }
+    },
+    "Hybrid": {
+      "name": "Hybrid",
+      "n_detections": 18,
+      "tp": 18,
+      "fp": 0,
+      "tp_catalogue": 16,
+      "tp_semantic": 2,
+      "precision": 1.0,
+      "recall_catalogue": 1.0,
+      "recall_semantic": 1.0,
+      "recall_overall": 1.0,
+      "f1": 1.0,
+      "clean_false_positives": 0,
+      "review_questions": 1,
+      "leaks_total_catalogue": 9,
+      "leaks_total_semantic": 2,
+      "per_case": {
+        "trap01_future_feature.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "trap02_smoothed_signal.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap03_full_sample_scaler.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "trap04_backfilled_prices.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap05_fit_on_test.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "trap06_global_zscore.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "trap07_target_as_feature.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "trap08_two_leaks.py": {
+          "kind": "trapped",
+          "detections": 4,
+          "tp": 4,
+          "fp": 0
+        },
+        "clean01_causal_engine.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean02_lagged_features.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean03_train_only_scaler.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean04_alignment_and_sharpe.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean05_expanding_norm.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "sem01_same_day_aggregate.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "sem02_indexed_lookahead.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "dep01_signal_only.py": {
+          "kind": "dependent",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        }
+      }
+    },
+    "LLM (cap off)": {
+      "name": "LLM (cap off)",
+      "n_detections": 9,
+      "tp": 9,
+      "fp": 0,
+      "tp_catalogue": 7,
+      "tp_semantic": 2,
+      "precision": 1.0,
+      "recall_catalogue": 0.7777777777777778,
+      "recall_semantic": 1.0,
+      "recall_overall": 0.8181818181818182,
+      "f1": 0.9,
+      "clean_false_positives": 0,
+      "review_questions": 1,
+      "leaks_total_catalogue": 9,
+      "leaks_total_semantic": 2,
+      "per_case": {
+        "trap01_future_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap02_smoothed_signal.py": {
+          "kind": "trapped",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "trap03_full_sample_scaler.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap04_backfilled_prices.py": {
+          "kind": "trapped",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "trap05_fit_on_test.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap06_global_zscore.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap07_target_as_feature.py": {
+          "kind": "trapped",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "trap08_two_leaks.py": {
+          "kind": "trapped",
+          "detections": 2,
+          "tp": 2,
+          "fp": 0
+        },
+        "clean01_causal_engine.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean02_lagged_features.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean03_train_only_scaler.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean04_alignment_and_sharpe.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "clean05_expanding_norm.py": {
+          "kind": "clean",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        },
+        "sem01_same_day_aggregate.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "sem02_indexed_lookahead.py": {
+          "kind": "semantic",
+          "detections": 1,
+          "tp": 1,
+          "fp": 0
+        },
+        "dep01_signal_only.py": {
+          "kind": "dependent",
+          "detections": 0,
+          "tp": 0,
+          "fp": 0
+        }
+      }
+    }
+  },
+  "llm_meta": {
+    "prompt_version": "1.2.0",
+    "rejected": 0,
+    "capped": 0,
+    "notes": [],
+    "results": {
+      "trap01_future_feature.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 11,
+            "line_end": 12,
+            "snippet": "feat = close.shift(-1) / close - 1.0          # LEAK: t sees P[t+1]",
+            "explanation": "close.shift(-1) moves tomorrow's closing price into today's row, so feat at time t equals (P[t+1]/P[t] - 1). The position signal pos is therefore constructed entirely from a future price that would be unknown at decision time t, constituting a direct one-bar look-ahead bias.",
+            "suggested_fix": "Replace close.shift(-1) with close.shift(1) (or close.pct_change()) to use yesterday's close as the momentum input, ensuring the feature at time t is built only from prices available at or before t. Also remove the special-case iloc[-1] = 0 zeroing, which was only needed to mask the NaN introduced by the negative shift.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap01_future_feature.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap02_smoothed_signal.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap03_full_sample_scaler.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 21,
+            "line_end": 23,
+            "snippet": "scaler.fit(features)                 # LEAK: fitted before the split",
+            "explanation": "The custom Scaler is fitted on the entire `features` series (all 400 rows) before the train/test split is applied. Its `fit` method computes `mu` and `sd` from np.mean and np.std over the full sample (line 12), so both statistics incorporate values from the held-out test period (rows `split:` onward). When `transform` is subsequently called on the training slice (line 22) and the out-of-sample slice (line 23), both use a mean and standard deviation that have already seen future data, constituting direct look-ahead bias in the preprocessing step.",
+            "suggested_fix": "Fit the scaler exclusively on the training portion: call `scaler.fit(features.iloc[:split])` instead of `scaler.fit(features)`, then apply `scaler.transform` to both slices as before. This ensures the scaling statistics are derived only from information available up to the split point.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap03_full_sample_scaler.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap04_backfilled_prices.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap05_fit_on_test.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 22,
+            "line_end": 23,
+            "snippet": "model.fit(x_test, resp_test)     # LEAK: fitted on the test slice",
+            "explanation": "The Ridge model is fitted on x_test and resp_test (the held-out slice) rather than on the training data. The subsequent prediction and error calculation are therefore entirely in-sample: the model has already seen every response value it is evaluated against, making the reported MSE an in-sample metric falsely presented as out-of-sample performance.",
+            "suggested_fix": "Fit the model on the training data and evaluate on the test data: replace `model.fit(x_test, resp_test)` with `model.fit(x_train, resp_train)`. The error should then be computed as `model.predict(x_test) - np.asarray(resp_test)`, which remains correct.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap05_fit_on_test.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap06_global_zscore.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 12,
+            "line_end": 12,
+            "snippet": "z = (close - close.mean()) / close.std()   # LEAK: full-sample statistics",
+            "explanation": "close.mean() and close.std() are computed over the entire series before any position is taken. Every bar's z-score therefore incorporates price levels and volatility from all future bars, giving the strategy look-ahead information at every time step.",
+            "suggested_fix": "Replace the whole-sample statistics with an expanding (or rolling) window computed only on past data, e.g.: rolling_mean = close.expanding().mean(); rolling_std = close.expanding().std(); z = (close - rolling_mean) / rolling_std. This ensures that at bar t only information from bars 0..t is used.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap06_global_zscore.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap07_target_as_feature.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 12,
+            "line_end": 12,
+            "snippet": "edge = target.rolling(5).mean()           # LEAK: feature reads label values",
+            "explanation": "The feature 'edge' is computed as a rolling mean of 'target', which is itself the forward return (close.pct_change().shift(-1)). Each value of 'edge' at time t is the average of forward returns at t, t+1, t+2, t+3, and t+4 \u2014 all of which are future quantities relative to the decision point at t. This directly encodes future label information into a training feature, constituting a textbook label-leakage pattern.",
+            "suggested_fix": "Derive 'edge' from past returns only, not from the forward-return label. For example: past_ret = close.pct_change(); edge = past_ret.rolling(5).mean(). This uses only historically available data at each time step.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap07_target_as_feature.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "trap08_two_leaks.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 10,
+            "line_end": 10,
+            "snippet": "px = raw.fillna(method=\"bfill\")           # LEAK 1: gaps take future values",
+            "explanation": "fillna(method='bfill') propagates future prices backward: a NaN at time t is filled with the next available price at t+k (k>0), so the cleaned series at time t contains information that was not yet available at t.",
+            "suggested_fix": "Replace bfill with forward-fill: px = raw.fillna(method='ffill'). This fills gaps with the most recent known price rather than a future one.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap08_two_leaks.py",
+            "external_dependency": null,
+            "capped_from": null
+          },
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 15,
+            "line_end": 15,
+            "snippet": "sig = close.shift(-2)                     # LEAK 2: t sees P[t+2]",
+            "explanation": "close.shift(-2) shifts the price series two steps into the future, so the signal at time t equals P[t+2], giving the strategy perfect knowledge of prices two periods ahead before any position is taken.",
+            "suggested_fix": "Use a non-negative shift (e.g., close.shift(1)) so the signal at time t is based only on prices known at or before t.",
+            "detector": "llm",
+            "filename": "bench\\cases\\trap08_two_leaks.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "clean01_causal_engine.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "clean02_lagged_features.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "clean03_train_only_scaler.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "clean04_alignment_and_sharpe.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "clean05_expanding_norm.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "sem01_same_day_aggregate.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 14,
+            "line_end": 15,
+            "snippet": "day_mean = close.groupby(day).transform(\"mean\")   # LEAK: full-day statistic",
+            "explanation": "close.groupby(day).transform('mean') computes the mean of every bar within the same calendar day and broadcasts it back to each bar in that day. A morning bar at 09:30 therefore receives a statistic that incorporates all afternoon prices from the same session \u2014 prices that do not yet exist at decision time. The relative-deviation 'rel' and the resulting position 'pos' are thus contaminated with future intraday information for every bar except the last one of each day.",
+            "suggested_fix": "Replace the full-day mean with an expanding or rolling mean that is strictly backward-looking, e.g. use a groupby-cumsum approach: day_mean = close.groupby(day).expanding().mean().droplevel(0).sort_index(). This gives each bar only the average of prices up to and including that bar within the session, eliminating the look-ahead.",
+            "detector": "llm",
+            "filename": "bench\\cases\\sem01_same_day_aggregate.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "sem02_indexed_lookahead.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "high",
+            "line_start": 17,
+            "line_end": 18,
+            "snippet": "drift = prices[t + horizon] / prices[t] - 1.0   # LEAK: reads the future",
+            "explanation": "At each bar t, `prices[t + horizon]` directly reads the closing price 5 bars in the future. This value is used to compute `drift` and set `pos[t]`, meaning the position held at time t is determined by information that is not yet available at t. This is a plain index look-ahead with no syntactic marker (no shift, no rolling, no bfill), making it invisible to rule-based scanners.",
+            "suggested_fix": "Compute drift using only information available at or before t. For a momentum-style signal use past returns, e.g. `drift = prices[t] / prices[t - horizon] - 1.0` (with t >= horizon as the loop guard), so the position at t is based solely on the price history up to and including t.",
+            "detector": "llm",
+            "filename": "bench\\cases\\sem02_indexed_lookahead.py",
+            "external_dependency": null,
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      },
+      "dep01_signal_only.py": {
+        "ran": true,
+        "prompt_version": "1.2.0",
+        "findings": [
+          {
+            "rule_id": "SEM",
+            "title": "Semantic leakage (LLM, to verify)",
+            "severity": "review",
+            "line_start": 21,
+            "line_end": 21,
+            "snippet": "pos[t] = 1.0 if z > k else (-1.0 if z < -k else 0.0)",
+            "explanation": "The signal at bar t is computed from prices[t] (the close of bar t) and immediately written into pos[t]. Whether this constitutes look-ahead bias depends entirely on how the external engine maps pos[t] to a trade: if it fills the position using bar-t's close or any intra-bar price, future information is consumed; if it defers execution to bar t+1, the logic is causal.",
+            "suggested_fix": "If the engine executes pos[t] at bar t's close (or any bar-t price), shift the output series by one period before passing it to the engine: `return pd.Series(pos, index=close.index, name='position').shift(1)`. If the engine already defers execution to bar t+1, no change is needed.",
+            "detector": "llm",
+            "filename": "bench\\cases\\dep01_signal_only.py",
+            "external_dependency": "Verify whether the consuming backtesting engine interprets pos[t] as a position entered at the close of bar t (look-ahead) or at the open/close of bar t+1 (causal); if the engine trades on the same bar whose close was used to compute the signal, there is look-ahead bias.",
+            "capped_from": null
+          }
+        ],
+        "rejected": [],
+        "capped": [],
+        "notes": []
+      }
+    },
+    "enforce_external_cap": true
+  },
+  "ablation": {
+    "localisation_identical": true,
+    "n_locations": 10,
+    "severity_changes": 0,
+    "control_detections_cap_on": 0,
+    "control_detections_cap_off": 0
+  }
+}
