@@ -56,7 +56,7 @@ git clone https://github.com/tcroche/Side-Project/tree/main/Polymer_Project
 cd Polymer
 python -m venv .venv && .venv\Scripts\activate      # Windows
 pip install -r requirements.txt
-python -m pytest                                     # 267 tests
+python -m pytest                                     # 292 tests
 ```
 
 Code audit only, offline, free, no account:
