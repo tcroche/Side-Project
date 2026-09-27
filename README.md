@@ -29,6 +29,6 @@ The goal is to build **end-to-end, recruiter-friendly projects**: clean data pip
 **Goal:** NLP... Coming...
 
 ### 6) Polymer Tech Expo
-**Goal:** LLM and finance... whose idea was it to pursue quant finance ? Wait... Mine...
+**Goal:** LLM and finance... whose idea was it to pursue quant finance ? Wait... Mine... (Finished in the top 20 of the polymer tech expo 2026, shortlisted for internship in 2027 in the risk & quant analytics team)
 
 📁 Folder: `Polymer_project/`
