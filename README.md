@@ -16,6 +16,10 @@ The goal is to build **end-to-end, recruiter-friendly projects**: clean data pip
 📁 Folder: `Huawei ICT Competition/`
 
 ### 3) Polymer Tech Expo
-**Goal:** Finished in the top 20 of the polymer tech expo 2026, shortlisted for internship in 2027 in the risk & quant analytics team
+**Goal:** audit a backtest on two independent axes — statistical deflation
+(PSR, DSR, PBO/CSCV, MinTRL, P&L concentration) and code leakage (deterministic
+AST rules + a grounded LLM pass) — in one offline HTML report. 292 tests,
+16-case seeded-bug benchmark. Built for the Polymer Capital Tech Expo 2026
+(top 20, shortlisted for a 2027 internship).
 
 📁 Folder: `Polymer_project/`
