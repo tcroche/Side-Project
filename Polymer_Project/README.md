@@ -20,7 +20,7 @@ prints to A4 PDF from any browser.
 
 ## The result it was built to produce
 
-The demonstration case is my ownMSc. backtester: an intraday momentum strategy on five
+The demonstration case is my own MSc. backtester: an intraday momentum strategy on five
 equity indices, in-sample Sharpe **1.92** over 18 tuned configurations. My original write-up
 said the Sharpe "collapsed to a deflated 0.92", confusing a probability with a Sharpe ratio.
 BIA exists to catch exactly that.
@@ -316,5 +316,5 @@ be exercised end to end without any data at all.
 
 ## Author
 
-**Théo Crochemar**, MSc. Applied Mathematics and Quantitative Finance (MMMEF EFG : track), Université Paris 1
+**Théo Crochemar**, MSc. Applied Mathematics and Quantitative Finance (MMMEF), Université Paris 1
 Panthéon-Sorbonne. GitHub: [tcroche](https://github.com/tcroche).
