@@ -52,11 +52,13 @@ of its null: indistinguishable from noise, which is not the same thing as clean.
 Python 3.12.
 
 ```bash
-git clone https://github.com/tcroche/Side-Project/tree/main/Polymer_Project
-cd Polymer
-python -m venv .venv && .venv\Scripts\activate      # Windows
+git clone https://github.com/tcroche/Side-Project.git
+cd Side-Project/Polymer_Project
+python -m venv .venv
+source .venv/bin/activate        # macOS / Linux
+# .venv\Scripts\activate         # Windows
 pip install -r requirements.txt
-python -m pytest                                     # 292 tests
+python -m pytest                 # 292 tests
 ```
 
 Code audit only, offline, free, no account:
@@ -68,8 +70,8 @@ python run_audit.py path/to/strategy.py
 The full report, both axes, one file:
 
 ```bash
-python run_report.py --code my_backtester --out report.html ^
-  --trials data\trials.csv --meta data\trials_meta.csv ^
+python run_report.py --code my_backtester --out report.html \
+  --trials data/trials.csv --meta data/trials_meta.csv \
   --sharpe-col sharpe_annual --label "My universe"
 ```
 
